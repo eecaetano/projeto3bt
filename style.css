@@ -3,17 +3,23 @@ body {
   font-family: 'Orbitron', sans-serif;
   background: radial-gradient(circle at center, #000428, #004e92);
   color: #fff;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   perspective: 1000px;
 }
 
-.container, .scanner, .data-flow, .door {
+/* Seções principais */
+.container,
+.scanner,
+.data-flow,
+.door {
   text-align: center;
   padding: 100px 20px;
   transform-style: preserve-3d;
   animation: fadeIn 2s ease-in-out;
 }
 
+/* Botões interativos */
 .btn {
   background: #00f2ff;
   padding: 15px 30px;
@@ -22,13 +28,15 @@ body {
   color: #000;
   font-weight: bold;
   box-shadow: 0 0 20px #00f2ff;
-  transition: transform 0.3s;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .btn:hover {
   transform: scale(1.1) rotateY(10deg);
+  box-shadow: 0 0 40px #00f2ff;
 }
 
+/* Animações visuais */
 .animation {
   width: 300px;
   height: 300px;
@@ -39,6 +47,7 @@ body {
   box-shadow: 0 0 30px #00f2ff;
 }
 
+/* GIFs específicos por etapa */
 .face-scan {
   background-image: url('face-scan.gif');
 }
@@ -51,17 +60,24 @@ body {
   background-image: url('door-open.gif');
 }
 
-#scene-container {
+/* Container para cenas 3D */
+#scene-container,
+#particles-container,
+#door-scene {
   width: 100%;
   height: 80vh;
   background: radial-gradient(circle, #000428, #004e92);
   box-shadow: inset 0 0 100px #00f2ff;
 }
 
+/* Animação de entrada */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(50px) rotateX(-30deg); }
-  to { opacity: 1; transform: translateY(0) rotateX(0); }
-}
-.btn {
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  from {
+    opacity: 0;
+    transform: translateY(50px) rotateX(-30deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+  }
 }
