@@ -43,7 +43,7 @@ scene.add(head);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
-// Luz direcional para efeito dramático
+// Luz direcional
 const directionalLight = new THREE.DirectionalLight(0x00f2ff, 1);
 directionalLight.position.set(0, 5, 5);
 scene.add(directionalLight);
@@ -63,10 +63,8 @@ let laserY = -1.5;
 function animate() {
   requestAnimationFrame(animate);
 
-  // Rotação da cabeça
   head.rotation.y += 0.01;
 
-  // Movimento do laser
   laser.position.y = laserY;
   laserY += 0.02;
   if (laserY > 1.5) laserY = -1.5;
@@ -74,3 +72,4 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+
