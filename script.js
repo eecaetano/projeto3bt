@@ -9,6 +9,7 @@ document.querySelectorAll('.btn').forEach(btn => {
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 
+// Câmera
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / (window.innerHeight * 0.8),
@@ -17,9 +18,10 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.z = 5;
 
+// Renderizador
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight * 0.8);
-document.getElementById('particles-container').appendChild(renderer.domElement);
+document.getElementById('scene-container').appendChild(renderer.domElement);
 
 // Redimensionamento responsivo
 window.addEventListener('resize', () => {
@@ -28,43 +30,46 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight * 0.8);
 });
 
-// Criando partículas
-const particleCount = 1000;
-const particles = new THREE.BufferGeometry();
-const positions = [];
-
-for (let i = 0; i < particleCount; i++) {
-  positions.push((Math.random() - 0.5) * 10); // x
-  positions.push((Math.random() - 0.5) * 10); // y
-  positions.push((Math.random() - 0.5) * 10); // z
-}
-
-particles.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-const positionsArray = particles.attributes.position.array;
-
-const particleMaterial = new THREE.PointsMaterial({
+// Cabeça simulada (esfera)
+const headGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+const headMaterial = new THREE.MeshStandardMaterial({
   color: 0x00f2ff,
-  size: 0.05,
-  transparent: true,
-  opacity: 0.8
+  wireframe: true
 });
+const head = new THREE.Mesh(headGeometry, headMaterial);
+scene.add(head);
 
-const pointCloud = new THREE.Points(particles, particleMaterial);
-scene.add(pointCloud);
+// Luz ambiente
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
 
-// Animação única e completa
+// Luz direcional para efeito dramático
+const directionalLight = new THREE.DirectionalLight(0x00f2ff, 1);
+directionalLight.position.set(0, 5, 5);
+scene.add(directionalLight);
+
+// Laser scanner (linha vermelha)
+const laserMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+const laserGeometry = new THREE.BufferGeometry().setFromPoints([
+  new THREE.Vector3(-2, 0, 0),
+  new THREE.Vector3(2, 0, 0)
+]);
+const laser = new THREE.Line(laserGeometry, laserMaterial);
+scene.add(laser);
+
+let laserY = -1.5;
+
+// Animação
 function animate() {
   requestAnimationFrame(animate);
 
-  // Movimento vertical das partículas
-  for (let i = 0; i < positionsArray.length; i += 3) {
-    positionsArray[i + 1] += Math.sin(Date.now() * 0.001 + i) * 0.001;
-  }
-  particles.attributes.position.needsUpdate = true;
+  // Rotação da cabeça
+  head.rotation.y += 0.01;
 
-  // Rotação do conjunto
-  pointCloud.rotation.y += 0.002;
-  pointCloud.rotation.x += 0.001;
+  // Movimento do laser
+  laser.position.y = laserY;
+  laserY += 0.02;
+  if (laserY > 1.5) laserY = -1.5;
 
   renderer.render(scene, camera);
 }
