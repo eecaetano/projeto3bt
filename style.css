@@ -153,6 +153,11 @@ body {
   box-shadow: 0 0 20px #00f2ff;
 }
 
+.door-open {
+  background-image: url('opendoor.gif');
+  background-size: cover;
+  background-position: center;
+}
 /* === ANIMAÇÃO DE ENTRADA === */
 @keyframes fadeIn {
   from {
@@ -164,3 +169,4 @@ body {
     transform: translateY(0) rotateX(0);
   }
 }
+
