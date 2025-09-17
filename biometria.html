@@ -10,7 +10,7 @@
     <h1>🔍 Escaneamento Facial em 3D</h1>
     <p>Simulação de leitura biométrica com laser facial</p>
 
-    <!-- Modelo 3D incorporado do Sketchfab com ajustes -->
+    <!-- Modelo 3D com laser animado -->
     <div class="scanner-wrapper">
       <div class="laser"></div>
       <div class="sketchfab-embed-wrapper">
@@ -33,7 +33,14 @@
     </div>
 
     <br><br>
-    <a href="processamento.html" class="btn">Processar Dados</a>
+    <a href="processamento.html" class="btn" id="processar-btn" style="display: none;">Processar Dados</a>
   </div>
+
+  <!-- Script para mostrar o botão após o escaneamento -->
+  <script>
+    setTimeout(() => {
+      document.getElementById('processar-btn').style.display = 'inline-block';
+    }, 4000); // aparece após 4 segundos
+  </script>
 </body>
 </html>
