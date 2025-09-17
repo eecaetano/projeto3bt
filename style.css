@@ -1,3 +1,4 @@
+/* === ESTILO GERAL === */
 body {
   margin: 0;
   font-family: 'Orbitron', sans-serif;
@@ -8,7 +9,7 @@ body {
   perspective: 1000px;
 }
 
-/* Seções principais */
+/* === SEÇÕES PRINCIPAIS === */
 .container,
 .scanner,
 .data-flow,
@@ -18,6 +19,8 @@ body {
   transform-style: preserve-3d;
   animation: fadeIn 2s ease-in-out;
 }
+
+/* === TEXTOS DA PÁGINA INICIAL === */
 .container h1, .container h2, .container h3, .container p {
   margin-bottom: 20px;
 }
@@ -43,12 +46,9 @@ body {
   color: #ffffff;
 }
 
+/* === BOTÕES === */
 .btn {
   margin-top: 30px;
-}
-
-/* Botões interativos */
-.btn {
   background: #00f2ff;
   padding: 15px 30px;
   border-radius: 50px;
@@ -64,7 +64,7 @@ body {
   box-shadow: 0 0 40px #00f2ff;
 }
 
-/* Animações visuais */
+/* === ANIMAÇÕES VISUAIS === */
 .animation {
   width: 300px;
   height: 300px;
@@ -75,7 +75,7 @@ body {
   box-shadow: 0 0 30px #00f2ff;
 }
 
-/* GIFs específicos por etapa */
+/* === GIFs por etapa === */
 .face-scan {
   background-image: url('face-scan.gif');
 }
@@ -88,7 +88,7 @@ body {
   background-image: url('door-open.gif');
 }
 
-/* Container para cenas 3D */
+/* === CONTAINERS 3D === */
 #scene-container,
 #particles-container,
 #door-scene {
@@ -98,7 +98,21 @@ body {
   box-shadow: inset 0 0 100px #00f2ff;
 }
 
-/* Animação de entrada */
+/* === SKETCHFAB EMBED === */
+.sketchfab-embed-wrapper {
+  box-shadow: 0 0 30px #00f2ff;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 40px auto;
+  max-width: 640px;
+}
+
+.sketchfab-embed-wrapper iframe {
+  border: none;
+  border-radius: 10px;
+}
+
+/* === ANIMAÇÃO DE ENTRADA === */
 @keyframes fadeIn {
   from {
     opacity: 0;
