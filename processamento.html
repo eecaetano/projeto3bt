@@ -8,30 +8,30 @@
 <body class="data-flow">
   <div class="container">
     <h1>💾 Etapa 2: Processamento Inteligente</h1>
-    <p>Os dados estão sendo convertidos e enviados para o servidor da escola...</p>
+    <p>Os dados estão sendo convertidos e enviados para o servidor da escola via ESP32 com Wi-Fi...</p>
 
-    <!-- GIF de fluxo de dados -->
+    <!-- GIF de transmissão real via ESP32 -->
     <div class="animation data-stream"></div>
 
     <!-- Texto dinâmico simulando logs -->
     <div id="log-output" class="log"></div>
 
-    <br><br>
-    <a href="acesso.html" class="btn">Liberar Acesso</a>
+    <!-- Botão que aparece após o processamento -->
+    <a href="acesso.html" class="btn" id="acesso-btn" style="display: none;">Liberar Acesso</a>
   </div>
 
   <script>
-const logs = [
-  "🔍 Analisando padrões faciais...",
-  "📡 Conectando ao banco de dados...",
-  "📶 Transmissão via ESP32 Wi-Fi iniciada...",
-  "🔐 Validando credenciais...",
-  "✅ Dados confirmados com sucesso!",
-  "🚪 Preparando liberação de acesso..."
-];
-
+    const logs = [
+      "🔍 Analisando padrões faciais...",
+      "📡 Conectando ao banco de dados...",
+      "📶 Transmissão via ESP32 Wi-Fi iniciada...",
+      "🔐 Validando credenciais...",
+      "✅ Dados confirmados com sucesso!",
+      "🚪 Preparando liberação de acesso..."
+    ];
 
     const logContainer = document.getElementById("log-output");
+    const acessoBtn = document.getElementById("acesso-btn");
     let index = 0;
 
     function showLog() {
@@ -41,6 +41,8 @@ const logs = [
         logContainer.appendChild(line);
         index++;
         setTimeout(showLog, 1000);
+      } else {
+        acessoBtn.style.display = "inline-block";
       }
     }
 
