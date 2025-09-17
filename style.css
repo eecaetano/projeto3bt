@@ -9,11 +9,24 @@ body {
   perspective: 1000px;
 }
 
-/* === SEÇÕES PRINCIPAIS === */
+/* === VÍDEO DE FUNDO PARA PÁGINA INICIAL === */
+#bg-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  z-index: -1;
+  object-fit: cover;
+  filter: brightness(0.3);
+}
+
+/* === CONTAINER GERAL === */
 .container,
 .scanner,
 .data-flow,
-.door {
+.door,
+.intro .container {
   text-align: center;
   padding: 100px 20px;
   transform-style: preserve-3d;
@@ -21,6 +34,29 @@ body {
 }
 
 /* === TEXTOS DA PÁGINA INICIAL === */
+.headline {
+  font-size: 3em;
+  color: #00f2ff;
+  text-shadow: 0 0 20px #00f2ff;
+  animation: fadeInScale 2s ease-out;
+}
+
+.subtext {
+  font-size: 1.5em;
+  color: #ffffff;
+  margin-top: 10px;
+  animation: fadeIn 3s ease-out;
+}
+
+.project-title {
+  font-size: 1.2em;
+  color: #ffffff;
+  margin-top: 30px;
+  line-height: 1.5em;
+  animation: fadeIn 3.5s ease-out;
+}
+
+/* === TEXTOS DAS OUTRAS PÁGINAS === */
 .container h1, .container h2, .container h3, .container p {
   margin-bottom: 20px;
 }
@@ -64,6 +100,22 @@ body {
   box-shadow: 0 0 40px #00f2ff;
 }
 
+.btn.neon {
+  margin-top: 40px;
+  padding: 15px 40px;
+  background: #00f2ff;
+  color: #000;
+  border-radius: 50px;
+  font-weight: bold;
+  box-shadow: 0 0 30px #00f2ff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn.neon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 60px #00f2ff;
+}
+
 /* === ANIMAÇÕES VISUAIS === */
 .animation {
   width: 300px;
@@ -80,15 +132,15 @@ body {
 
 /* === GIFs por etapa === */
 .face-scan {
-  background-image: url('danyface.gif');
+  background-image: url('face.gif');
 }
 
 .data-stream {
-  background-image: url('dadostranmition.gif'); /* Atualizado para o GIF correto */
+  background-image: url('dadostranmition.gif');
 }
 
 .door-open {
-  background-image: url('door-open.gif');
+  background-image: url('opendoor.gif');
 }
 
 /* === CONTAINERS 3D === */
@@ -101,7 +153,7 @@ body {
   box-shadow: inset 0 0 100px #00f2ff;
 }
 
-/* === SKETCHFAB EMBED (mantido para compatibilidade futura) === */
+/* === SKETCHFAB EMBED === */
 .sketchfab-embed-wrapper {
   box-shadow: 0 0 30px #00f2ff;
   border-radius: 10px;
@@ -153,12 +205,7 @@ body {
   box-shadow: 0 0 20px #00f2ff;
 }
 
-.door-open {
-  background-image: url('opendoor.gif');
-  background-size: cover;
-  background-position: center;
-}
-/* === ANIMAÇÃO DE ENTRADA === */
+/* === ANIMAÇÕES DE ENTRADA === */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -170,3 +217,13 @@ body {
   }
 }
 
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
