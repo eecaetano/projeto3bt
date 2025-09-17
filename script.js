@@ -51,3 +51,19 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+const positionsArray = particles.attributes.position.array;
+
+function animate() 
+{
+
+requestAnimationFrame(animate);
+
+  for (let i = 0; i < positionsArray.length; i += 3) {
+    positionsArray[i + 1] += Math.sin(Date.now() * 0.001 + i) * 0.001; // movimento vertical
+  }
+  particles.attributes.position.needsUpdate = true;
+
+  pointCloud.rotation.y += 0.002;
+  pointCloud.rotation.x += 0.001;
+  renderer.render(scene, camera);
+}
