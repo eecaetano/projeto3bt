@@ -2,15 +2,16 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Leitura Facial</title>
+  <title>Leitura Facial 3D</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body class="biometria">
-  <div class="scanner">
-    <h2>🔍 Etapa 1: Leitura Biométrica</h2>
-    <p>O sistema escaneia os pontos faciais com precisão milimétrica.</p>
-    <div class="animation face-scan"></div>
-    <a href="processamento.html" class="btn">Processar Dados</a>
-  </div>
+  <h1>🔍 Escaneamento Facial em 3D</h1>
+  <p>Simulação de leitura biométrica com laser facial</p>
+  <div id="scene-container"></div>
+  <a href="processamento.html" class="btn">Processar Dados</a>
+
+  <script src="script.js"></script>
 </body>
 </html>
