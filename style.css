@@ -71,8 +71,10 @@ body {
   margin: 40px auto;
   background-size: cover;
   background-repeat: no-repeat;
-  border-radius: 50%;
+  border-radius: 10px;
   box-shadow: 0 0 30px #00f2ff;
+  position: relative;
+  z-index: 5;
 }
 
 /* === GIFs por etapa === */
@@ -100,7 +102,7 @@ body {
   box-shadow: inset 0 0 100px #00f2ff;
 }
 
-/* === SKETCHFAB EMBED (não usado aqui, mas mantido para compatibilidade) === */
+/* === SKETCHFAB EMBED (mantido para compatibilidade futura) === */
 .sketchfab-embed-wrapper {
   box-shadow: 0 0 30px #00f2ff;
   border-radius: 10px;
@@ -114,7 +116,7 @@ body {
   border-radius: 10px;
 }
 
-/* === LASER ANIMADO SOBRE O MODELO === */
+/* === LASER ANIMADO SOBRE O GIF === */
 .scanner-wrapper {
   position: relative;
   width: 300px;
