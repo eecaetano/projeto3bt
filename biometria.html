@@ -4,23 +4,26 @@
   <meta charset="UTF-8">
   <title>Leitura Facial 3D</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body class="biometria">
   <div class="scanner">
     <h1>🔍 Escaneamento Facial em 3D</h1>
     <p>Simulação de leitura biométrica com laser facial</p>
 
-    <!-- Container para renderizar a cena 3D -->
-    <div id="scene-container"></div>
+    <!-- Modelo 3D incorporado do Sketchfab -->
+    <div class="sketchfab-embed-wrapper" style="margin: 40px auto; max-width: 640px;">
+      <iframe title="Danny Boy's Face" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"
+        allow="autoplay; fullscreen; xr-spatial-tracking"
+        xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share
+        width="100%" height="480"
+        src="https://sketchfab.com/models/7adcb265aa244828ba60e285d02b7356/embed">
+      </iframe>
+    </div>
 
     <!-- Espaço extra para separar visualmente -->
     <br><br>
 
     <a href="processamento.html" class="btn">Processar Dados</a>
   </div>
-
-  <!-- Script que renderiza a cena 3D -->
-  <script src="script.js"></script>
 </body>
 </html>
