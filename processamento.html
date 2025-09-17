@@ -9,17 +9,13 @@
   <div class="container">
     <h1>💾 Etapa 2: Processamento Inteligente</h1>
     <p>Os dados estão sendo convertidos e enviados para o servidor da escola via ESP32 com Wi-Fi...</p>
-
     <!-- GIF de transmissão real via ESP32 -->
     <div class="animation data-stream"></div>
-
     <!-- Texto dinâmico simulando logs -->
     <div id="log-output" class="log"></div>
-
     <!-- Botão que aparece após o processamento -->
     <a href="acesso.html" class="btn" id="acesso-btn" style="display: none;">Liberar Acesso</a>
   </div>
-
   <script>
     const logs = [
       "🔍 Analisando padrões faciais...",
@@ -29,11 +25,9 @@
       "✅ Dados confirmados com sucesso!",
       "🚪 Preparando liberação de acesso..."
     ];
-
     const logContainer = document.getElementById("log-output");
     const acessoBtn = document.getElementById("acesso-btn");
     let index = 0;
-
     function showLog() {
       if (index < logs.length) {
         const line = document.createElement("p");
