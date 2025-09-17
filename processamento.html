@@ -2,15 +2,47 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Processamento</title>
+  <title>Processamento de Dados</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="processamento">
-  <div class="data-flow">
-    <h2>💾 Etapa 2: Processamento Inteligente</h2>
-    <p>Os dados são comparados com o banco da escola em tempo real.</p>
+<body class="data-flow">
+  <div class="container">
+    <h1>💾 Etapa 2: Processamento Inteligente</h1>
+    <p>Os dados estão sendo convertidos e enviados para o servidor da escola...</p>
+
+    <!-- GIF de fluxo de dados -->
     <div class="animation data-stream"></div>
+
+    <!-- Texto dinâmico simulando logs -->
+    <div id="log-output" class="log"></div>
+
+    <br><br>
     <a href="acesso.html" class="btn">Liberar Acesso</a>
   </div>
+
+  <script>
+    const logs = [
+      "🔍 Analisando padrões faciais...",
+      "📡 Conectando ao banco de dados...",
+      "🔐 Validando credenciais...",
+      "✅ Dados confirmados com sucesso!",
+      "🚪 Preparando liberação de acesso..."
+    ];
+
+    const logContainer = document.getElementById("log-output");
+    let index = 0;
+
+    function showLog() {
+      if (index < logs.length) {
+        const line = document.createElement("p");
+        line.textContent = logs[index];
+        logContainer.appendChild(line);
+        index++;
+        setTimeout(showLog, 1000);
+      }
+    }
+
+    showLog();
+  </script>
 </body>
 </html>
