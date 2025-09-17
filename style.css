@@ -62,3 +62,6 @@ body {
   from { opacity: 0; transform: translateY(50px) rotateX(-30deg); }
   to { opacity: 1; transform: translateY(0) rotateX(0); }
 }
+.btn {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
