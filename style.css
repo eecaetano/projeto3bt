@@ -1,0 +1,57 @@
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: radial-gradient(circle at center, #000428, #004e92);
+  color: #fff;
+  overflow: hidden;
+  perspective: 1000px;
+}
+
+.container, .scanner, .data-flow, .door {
+  text-align: center;
+  padding: 100px 20px;
+  transform-style: preserve-3d;
+  animation: fadeIn 2s ease-in-out;
+}
+
+.btn {
+  background: #00f2ff;
+  padding: 15px 30px;
+  border-radius: 50px;
+  text-decoration: none;
+  color: #000;
+  font-weight: bold;
+  box-shadow: 0 0 20px #00f2ff;
+  transition: transform 0.3s;
+}
+
+.btn:hover {
+  transform: scale(1.1) rotateY(10deg);
+}
+
+.animation {
+  width: 300px;
+  height: 300px;
+  margin: 40px auto;
+  background-size: cover;
+  background-repeat: no-repeat;
+  border-radius: 50%;
+  box-shadow: 0 0 30px #00f2ff;
+}
+
+.face-scan {
+  background-image: url('face-scan.gif');
+}
+
+.data-stream {
+  background-image: url('data-stream.gif');
+}
+
+.door-open {
+  background-image: url('door-open.gif');
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(50px) rotateX(-30deg); }
+  to { opacity: 1; transform: translateY(0) rotateX(0); }
+}
