@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cadastro Criptografado - Biometria Facial</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;background:#f4f6fb;margin:16px;color:#111}
+  h1{text-align:center}
+  .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+  input,button,select{padding:8px;border-radius:8px;border:1px solid #ccc}
+  button{background:#0b74ff;color:#fff;border:none;cursor:pointer}
+  .card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 6px 20px rgba(2,6,23,0.06);max-width:980px;margin:8px auto}
+  video,canvas,img{max-width:100%;border-radius:8px;border:1px solid #e6eefc}
+  .gallery{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:12px}
+  pre{background:#0f172463;padding:8px;border-radius:8px;overflow:auto}
+</style>
+</head>
+<body>
+  <h1>Cadastro com Imagem Criptografada</h1>
+
+  <div class="card">
+    <div class="row">
+      <input id="name" placeholder="Nome do usuário" />
+      <input id="id5" placeholder="ID (5 primeiros dígitos do CPF)" maxlength="5" style="width:160px"/>
+      <input id="password" type="password" placeholder="Senha para criptografia" style="width:220px"/>
+      <button id="start">Iniciar Câmera</button>
+      <button id="capture">Capturar e Criar JSON</button>
+    </div>
+
+    <div class="row">
+      <video id="video" autoplay playsinline style="width:320px;height:240px;background:#000"></video>
+      <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+      <div style="min-width:260px">
+        <p><b>Pré-visualização</b></p>
+        <img id="preview" alt="preview" style="width:240px;height:180px;object-fit:cover;background:#efefef"/>
+      </div>
+    </div>
+
+    <div class="row" style="justify-content:center">
+      <input type="file" id="loadJson" accept=".json"/>
+      <input id="passwordLoad" type="password" placeholder="Senha para descriptografar" style="width:220px"/>
+      <button id="decryptBtn">Carregar e Descriptografar</button>
+    </div>
+
+    <div style="margin-top:8px">
+      <p><small>O JSON gerado contém: <code>name, id, encryptedImage (base64 JPEG), iv (base64), salt (base64), kdf, iterations, alg</code>.</small></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Galeria / Histórico</h3>
+    <div class="gallery" id="gallery"></div>
+    <h4>Exemplo JSON (metadata)</h4>
+    <pre id="example" style="height:120px"></pre>
+  </div>
+
+<script>
+function bufToBase64(buf){
+  const bin = Array.prototype.map.call(new Uint8Array(buf), b => String.fromCharCode(b)).join('');
+  return btoa(bin);
+}
+function base64ToBuf(b64){
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return arr.buffer;
+}
+
+const iterations = 200000;
+async function deriveKeyFromPassword(password, salt){
+  const pwUtf8 = new TextEncoder().encode(password);
+  const baseKey = await crypto.subtle.importKey('raw', pwUtf8, {name:'PBKDF2'}, false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2', salt: salt, iterations: iterations, hash:'SHA-256'},
+    baseKey,
+    {name:'AES-GCM', length:256},
+    false,
+    ['encrypt','decrypt']
+  );
+}
+
+function randomBytes(len){ const b=new Uint8Array(len); crypto.getRandomValues(b); return b.buffer; }
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const preview = document.getElementById('preview');
+const gallery = document.getElementById('gallery');
+const example = document.getElementById('example');
+let stream=null;
+
+document.getElementById('start').addEventListener('click', async ()=>{
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video: { facingMode:'user' }, audio:false});
+    video.srcObject = stream;
+  } catch (e) {
+    alert('Erro ao acessar câmera: '+e.message);
+  }
+});
+
+document.getElementById('capture').addEventListener('click', async ()=>{
+  const name = document.getElementById('name').value.trim();
+  const id5 = document.getElementById('id5').value.trim();
+  const password = document.getElementById('password').value;
+  if(!name){ alert('Informe o nome'); return; }
+  if(!/^\d{5}$/.test(id5)){ alert('ID deve ter 5 dígitos numéricos'); return; }
+  if(!password){ alert('Informe uma senha para criptografia'); return; }
+  if(!stream){ alert('Ative a câmera primeiro'); return; }
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  // JPEG em vez de PNG (qualidade 0.8)
+  const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+  preview.src = dataURL;
+
+  const binary = atob(dataURL.split(',')[1]);
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+  const imageBuf = bytes.buffer;
+
+  const salt = randomBytes(16);
+  const iv = randomBytes(12);
+  const key = await deriveKeyFromPassword(password, salt);
+  const encrypted = await crypto.subtle.encrypt({name:'AES-GCM', iv: new Uint8Array(iv)}, key, imageBuf);
+
+  const payload = {
+    name: name,
+    id: id5,
+    kdf: 'PBKDF2',
+    iterations: iterations,
+    alg: 'AES-GCM',
+    salt: bufToBase64(salt),
+    iv: bufToBase64(iv),
+    encryptedImage: bufToBase64(encrypted)
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${name}_${id5}_enc.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  addToGallery(name, id5, preview.src, JSON.stringify(payload,null,2));
+  example.textContent = JSON.stringify(payload, null, 2);
+});
+
+document.getElementById('decryptBtn').addEventListener('click', async ()=>{
+  const fileInput = document.getElementById('loadJson');
+  const pw = document.getElementById('passwordLoad').value;
+  if(!fileInput.files.length){ alert('Selecione um arquivo JSON'); return; }
+  if(!pw){ alert('Informe a senha para descriptografar'); return; }
+  const file = fileInput.files[0];
+  const text = await file.text();
+  let payload;
+  try{ payload = JSON.parse(text); }
+  catch(e){ alert('Arquivo JSON inválido'); return; }
+  try{
+    const salt = base64ToBuf(payload.salt);
+    const iv = base64ToBuf(payload.iv);
+    const encryptedBuf = base64ToBuf(payload.encryptedImage);
+    const key = await deriveKeyFromPassword(pw, salt);
+    const decrypted = await crypto.subtle.decrypt({name:'AES-GCM', iv: new Uint8Array(iv)}, key, encryptedBuf);
+    const bytes = new Uint8Array(decrypted);
+    let bin = '';
+    for(let i=0;i<bytes.byteLength;i++) bin += String.fromCharCode(bytes[i]);
+    const b64 = btoa(bin);
+    const dataUrl = 'data:image/jpeg;base64,' + b64;
+    addToGallery(payload.name, payload.id, dataUrl, JSON.stringify(payload,null,2));
+  } catch(err){
+    console.error(err);
+    alert('Falha ao descriptografar — senha incorreta ou arquivo inválido.');
+  }
+});
+
+function addToGallery(name,id,dataUrl,jsonText){
+  const card = document.createElement('div');
+  card.style.width='220px';
+  card.style.background='#fff';
+  card.style.borderRadius='10px';
+  card.style.padding='8px';
+  card.style.boxShadow='0 6px 18px rgba(11,116,255,0.06)';
+  card.innerHTML = `
+    <img src="${dataUrl}" style="width:100%;height:140px;object-fit:cover;border-radius:6px"/><p style="margin:6px 0"><strong>${name}</strong><br>ID: ${id}</p>
+    <button style="padding:6px;border-radius:6px;border:0;background:#0b74ff;color:#fff;cursor:pointer">Baixar JSON</button>
+    <button style="margin-left:6px;padding:6px;border-radius:6px;border:0;background:#666;color:#fff;cursor:pointer">Excluir</button>
+    <pre style="display:none">${jsonText}</pre>
+  `;
+  const btnJson = card.querySelectorAll('button')[0];
+  const btnDel = card.querySelectorAll('button')[1];
+  const pre = card.querySelector('pre');
+
+  btnJson.addEventListener('click', ()=>{
+    const blob = new Blob([pre.textContent], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${name}_${id}_enc.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  btnDel.addEventListener('click', ()=>card.remove());
+  gallery.appendChild(card);
+}
+</script>
+</body>
+</html>
