@@ -1,36 +1,73 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Responsividade -->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Compatibilidade com IE -->
-  <title>Mostra Cultural 2025 - Caetano de Campos</title>
-  
-  <!-- Estilos -->
-  <link rel="stylesheet" href="style.css">
-  <!-- Fontes e ícones opcionais -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <!-- Ícone da aba -->
-  <link rel="icon" type="image/png" href="favicon.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Painel de Controle - Biometria Facial</title>
+  <style>
+    :root{--bg1:#0077cc;--bg2:#00aaff;--card-bg:rgba(255,255,255,0.12);--accent:#fff}
+    *{box-sizing:border-box;font-family:Inter,system-ui,Arial,Helvetica,sans-serif}
+    body{margin:0;min-height:100vh;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--accent)}
+    header{padding:28px 20px;text-align:center;background:rgba(0,0,0,0.12)}
+    header h1{margin:0;font-size:20px}
+    header p{margin:6px 0 0;color:rgba(255,255,255,0.9)}
+    .container{padding:28px;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+    .card{background:var(--card-bg);padding:18px;border-radius:12px;backdrop-filter:blur(6px);box-shadow:0 6px 18px rgba(2,6,23,0.12);transition:transform .18s ease,box-shadow .18s}
+    .card:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(2,6,23,0.18)}
+    .card h2{margin:0 0 8px;font-size:16px}
+    .card p{margin:0;color:rgba(255,255,255,0.9)}
+    .card a{display:inline-block;margin-top:12px;padding:10px 14px;border-radius:8px;background:#fff;color:var(--bg1);text-decoration:none;font-weight:600}
+    .card a.external{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--accent)}
+    footer{padding:12px;text-align:center;color:rgba(255,255,255,0.9);background:rgba(0,0,0,0.08)}
+    @media (max-width:520px){header h1{font-size:18px}}
+  </style>
 </head>
-<body class="intro">
-  <!-- Vídeo de fundo estilo outdoor -->
-  <video autoplay muted loop id="bg-video">
-    <source src="fundo-futurista.mp4" type="video/mp4">
-    Seu navegador não suporta vídeo em HTML5.
-  </video>
-  <div class="container">
-    <h1 class="headline">Mostra Cultural 2025</h1>
-    <h2 class="subtext">Diretoria de Ensino Centro-Sul</h2>
-    <h3 class="subtext">Escola Caetano de Campos</h3>
-    <br>
-    <p class="project-title">PROJETO DE SISTEMA DE AUTOMAÇÃO<br>POR MEIO DA BIOMETRIA FACIAL</p>
-<br>
-    <br>
-    <p> <a href="painel.html" class="btn neon">Acesse aqui</a> </p>
-    <br>
-    </div>
+<body>
+  <header>
+    <h1>📌 Painel de Controle - Biometria Facial</h1>
+    <p>Escolha uma ferramenta / documentação do projeto</p>
+  </header>
+
+  <main class="container">
+    <article class="card">
+      <h2>ℹ️ Saiba Mais</h2>
+      <p>Material introdutório sobre o uso da biometria facial.</p>
+      <a href="saibamais.html" target="_blank" rel="noopener">Acessar</a>
+    </article>
+
+    <article class="card">
+      <h2>👤 Conheça</h2>
+      <p>Apresentação do projeto e objetivos.</p>
+      <a href="biometria.html" target="_blank" rel="noopener">Acessar</a>
+    </article>
+
+    <article class="card">
+      <h2>⚙️ Simulador ESP32</h2>
+      <p>Simulação conectada ao ESP32-CAM via IP (stream / snapshot).</p>
+      <a href="simulador.html" target="_blank" rel="noopener">Acessar</a>
+    </article>
+
+    <article class="card">
+      <h2>📷 Simulador Local</h2>
+      <p>Use a câmera do dispositivo (notebook/tablet/celular).</p>
+      <a href="simuladoruser.html" target="_blank" rel="noopener">Acessar</a>
+    </article>
+
+    <article class="card">
+      <h2>📝 Cadastro de Usuários</h2>
+      <p>Cadastro com criptografia da imagem (JSON criptografado).</p>
+      <a href="cadastro_criptografado.html" target="_blank" rel="noopener">Acessar</a>
+    </article>
+
+    <article class="card">
+      <h2>📚 Acesso ao TCC (ref.)</h2>
+      <p>Documento de referência do projeto (TCC).</p>
+      <a class="external" href="https://drive.google.com/file/d/109OkVmNimhUmPncW79c4oZO-M95XC6JO/view?usp=sharing" target="_blank" rel="noopener noreferrer">Abrir TCC</a>
+    </article>
+  </main>
+
+  <footer>
+    <small>Projeto de Biometria Facial · Painel central · 2025</small>
+  </footer>
 </body>
 </html>
