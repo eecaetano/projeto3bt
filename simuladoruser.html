@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Biometria Facial - Câmera Local</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f2f4f8; margin:20px; }
+    h1 { text-align:center; color:#333; }
+    .container { display:flex; flex-direction:column; align-items:center; gap:20px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    select, button { padding:8px; border-radius:6px; border:1px solid #ccc; }
+    .btn { cursor:pointer; background:#0077cc; color:#fff; border:none; }
+    .flow { display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:20px; width:100%; max-width:1000px; }
+    .card { background:#fff; border-radius:12px; box-shadow:0 3px 6px rgba(0,0,0,0.1); padding:15px; text-align:center; }
+    .card video, .card canvas { max-width:100%; border-radius:8px; }
+    .log { background:#111; color:#0f0; font-family:monospace; padding:10px; border-radius:8px; width:100%; max-width:1000px; height:150px; overflow-y:auto; }
+  </style>
+</head>
+<body>
+  <h1>🔐 Simulador Biometria Facial - Câmera Local</h1>
+
+  <div class="container">
+    <!-- Controles -->
+    <div class="controls">
+      <label for="camera-select">Escolha a câmera:</label>
+      <select id="camera-select"></select>
+      <button id="start-btn" class="btn">Iniciar Captura</button>
+      <button id="snapshot-btn" class="btn">Capturar Foto</button>
+    </div>
+
+    <!-- Fluxo -->
+    <div class="flow">
+      <div class="card">
+        <h3>Captura</h3>
+        <video id="video" autoplay playsinline></video>
+      </div>
+
+      <div class="card">
+        <h3>Conversão ADC</h3>
+        <p id="adc-status">Aguardando...</p>
+      </div>
+
+      <div class="card">
+        <h3>Formação da Imagem</h3>
+        <canvas id="matrix-canvas" width="160" height="120" style="border:1px solid #ccc"></canvas>
+      </div>
+
+      <div class="card">
+        <h3>Compressão / Armazenamento</h3>
+        <p id="storage-status">Aguardando...</p>
+      </div>
+
+      <div class="card">
+        <h3>Processamento / Validação</h3>
+        <p id="process-status">Aguardando...</p>
+      </div>
+
+      <div class="card">
+        <h3>Abertura da Porta</h3>
+        <p id="door-status">Fechada 🚪🔒</p>
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div class="log" id="log"></div>
+  </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const matrixCanvas = document.getElementById('matrix-canvas');
+    const ctx = matrixCanvas.getContext('2d');
+    const adcStatus = document.getElementById('adc-status');
+    const storageStatus = document.getElementById('storage-status');
+    const processStatus = document.getElementById('process-status');
+    const doorStatus = document.getElementById('door-status');
+    const logBox = document.getElementById('log');
+    const cameraSelect = document.getElementById('camera-select');
+
+    let currentStream;
+
+    function appendLog(msg){
+      logBox.innerHTML += `> ${msg}<br>`;
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    async function listCameras(){
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      cameraSelect.innerHTML = '';
+      devices.forEach(device=>{
+        if(device.kind === 'videoinput'){
+          const option = document.createElement('option');
+          option.value = device.deviceId;
+          option.text = device.label || `Câmera ${cameraSelect.length+1}`;
+          cameraSelect.appendChild(option);
+        }
+      });
+    }
+
+    async function startCamera(deviceId){
+      if(currentStream){
+        currentStream.getTracks().forEach(track=>track.stop());
+      }
+      const constraints = {
+        video: deviceId ? { deviceId: { exact: deviceId } } : true
+      };
+      currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = currentStream;
+      appendLog('Câmera iniciada.');
+    }
+
+    async function captureSnapshot(){
+      adcStatus.textContent='Convertendo...';
+      storageStatus.textContent='...';
+      processStatus.textContent='...';
+      doorStatus.textContent='Fechada 🚪🔒';
+
+      // desenha o frame no canvas
+      ctx.drawImage(video,0,0,matrixCanvas.width,matrixCanvas.height);
+      appendLog('Frame capturado da câmera.');
+
+      setTimeout(()=>{
+        adcStatus.textContent='Sinal digital pronto ✅';
+        appendLog('ADC concluído.');
+      },800);
+
+      setTimeout(()=>{
+        const data=ctx.getImageData(0,0,matrixCanvas.width,matrixCanvas.height).data;
+        appendLog('Matriz formada '+matrixCanvas.width+'x'+matrixCanvas.height);
+      },1500);
+
+      setTimeout(()=>{
+        storageStatus.textContent='Imagem comprimida e salva 💾';
+        appendLog('Compressão/armazenamento feito.');
+      },2200);
+
+      setTimeout(()=>{
+        processStatus.textContent='Face reconhecida ✅';
+        appendLog('Validação biométrica aprovada.');
+      },3000);
+
+      setTimeout(()=>{
+        doorStatus.textContent='Porta Aberta 🚪✅';
+        appendLog('Porta liberada.');
+      },3800);
+    }
+
+    document.getElementById('start-btn').addEventListener('click',async()=>{
+      await listCameras();
+      const selected = cameraSelect.value;
+      startCamera(selected);
+    });
+
+    document.getElementById('snapshot-btn').addEventListener('click',captureSnapshot);
+
+    // lista câmeras no carregamento
+    listCameras();
+  </script>
+</body>
+</html>
