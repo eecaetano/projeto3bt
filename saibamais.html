@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saiba Mais...</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* ===== ESTILO DA PÁGINA SAIBA MAIS ===== */
+
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: radial-gradient(circle at center, #000428, #004e92);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    header {
+      text-align: center;
+      padding: 60px 20px 30px;
+      animation: fadeInScale 2s ease-out;
+    }
+
+    header h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      color: #00f2ff;
+      text-shadow: 0 0 20px #00f2ff;
+      margin: 0;
+    }
+
+    header p {
+      font-size: clamp(1rem, 3vw, 1.3rem);
+      margin-top: 10px;
+      color: #ddd;
+    }
+
+    section {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 30px 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00f2ff;
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    section h2 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      color: #00e0ff;
+      text-shadow: 0 0 10px #00f2ff;
+      margin-bottom: 15px;
+    }
+
+    section p {
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      line-height: 1.6;
+      color: #eee;
+    }
+
+    .btn-neon {
+      display: inline-block;
+      margin-top: 25px;
+      background: #00f2ff;
+      padding: 12px 28px;
+      border-radius: 40px;
+      text-decoration: none;
+      color: #000;
+      font-weight: bold;
+      font-size: clamp(0.9rem, 2.5vw, 1rem);
+      box-shadow: 0 0 20px #00f2ff;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn-neon:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 40px #00f2ff;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    /* === ANIMAÇÕES === */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.6); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🔎 Saiba Mais...</h1>
+    <p>Explorando tecnologia e inovação em biometria facial</p>
+  </header>
+
+  <!-- ESP32-CAM -->
+  <section>
+    <h2>📷 ESP32-CAM Integrada</h2>
+    <p>
+      O <strong>ESP32-CAM</strong> é um microcontrolador poderoso e acessível que combina 
+      conectividade Wi-Fi/Bluetooth com uma câmera integrada.  
+      Ele é amplamente utilizado em projetos de automação, segurança e 
+      IoT (Internet das Coisas), permitindo a captura de imagens e 
+      reconhecimento facial em tempo real.
+    </p>
+    <a href="https://randomnerdtutorials.com/esp32-cam-projects-ebook/" target="_blank" class="btn-neon">Ver Mais</a>
+  </section>
+
+  <!-- BIOMETRIA FACIAL -->
+  <section>
+    <h2>🧬 Biometria Facial: Avanços e Pesquisas</h2>
+    <p>
+      A <strong>biometria facial</strong> tem se tornado cada vez mais presente no dia a dia, 
+      desde desbloqueio de smartphones até sistemas avançados de segurança.  
+      Pesquisas recentes exploram a integração com inteligência artificial, 
+      aumentando a precisão do reconhecimento mesmo em ambientes desafiadores.  
+      Em 2025, novas aplicações surgem em áreas como transporte público, 
+      saúde digital e controle de acesso inteligente.
+    </p>
+    <a href="https://www.sciencedirect.com/topics/computer-science/face-recognition" target="_blank" class="btn-neon">Últimas Notícias</a>
+  </section>
+
+  <footer>
+    <p>🔒 Projeto 3BT – Futuro da Biometria Facial</p>
+  </footer>
+
+</body>
+</html>
