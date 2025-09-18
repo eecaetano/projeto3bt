@@ -29,27 +29,29 @@ body {
 .intro .container {
   text-align: center;
   padding: 100px 20px;
+  max-width: 1200px; /* evita textos muito largos em telas grandes */
+  margin: 0 auto;
   transform-style: preserve-3d;
   animation: fadeIn 2s ease-in-out;
 }
 
 /* === TEXTOS DA PÁGINA INICIAL === */
 .headline {
-  font-size: 3em;
+  font-size: clamp(1.8rem, 5vw, 3em);
   color: #00f2ff;
   text-shadow: 0 0 20px #00f2ff;
   animation: fadeInScale 2s ease-out;
 }
 
 .subtext {
-  font-size: 1.5em;
+  font-size: clamp(1rem, 3vw, 1.5em);
   color: #ffffff;
   margin-top: 10px;
   animation: fadeIn 3s ease-out;
 }
 
 .project-title {
-  font-size: 1.2em;
+  font-size: clamp(0.9rem, 2vw, 1.2em);
   color: #ffffff;
   margin-top: 30px;
   line-height: 1.5em;
@@ -62,23 +64,23 @@ body {
 }
 
 .container h1 {
-  font-size: 2.5em;
+  font-size: clamp(2rem, 4vw, 2.5em);
   color: #00f2ff;
   text-shadow: 0 0 10px #00f2ff;
 }
 
 .container h2 {
-  font-size: 1.8em;
+  font-size: clamp(1.5rem, 3vw, 1.8em);
   color: #00e0e0;
 }
 
 .container h3 {
-  font-size: 1.5em;
+  font-size: clamp(1.2rem, 2.5vw, 1.5em);
   color: #00c0ff;
 }
 
 .container p {
-  font-size: 1.2em;
+  font-size: clamp(1rem, 2vw, 1.2em);
   color: #ffffff;
 }
 
@@ -86,46 +88,49 @@ body {
 .btn {
   margin-top: 30px;
   background: #00f2ff;
-  padding: 15px 30px;
+  padding: 12px 24px;
   border-radius: 50px;
   text-decoration: none;
   color: #000;
   font-weight: bold;
-  box-shadow: 0 0 20px #00f2ff;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  box-shadow: 0 0 15px #00f2ff;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .btn:hover {
-  transform: scale(1.1) rotateY(10deg);
-  box-shadow: 0 0 40px #00f2ff;
+  transform: scale(1.05) rotateY(10deg);
+  box-shadow: 0 0 30px #00f2ff;
 }
 
 .btn.neon {
   margin-top: 40px;
-  padding: 15px 40px;
+  padding: 12px 28px;
   background: #00f2ff;
   color: #000;
   border-radius: 50px;
   font-weight: bold;
-  box-shadow: 0 0 30px #00f2ff;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  box-shadow: 0 0 20px #00f2ff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .btn.neon:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 60px #00f2ff;
+  transform: scale(1.08);
+  box-shadow: 0 0 50px #00f2ff;
 }
 
 /* === ANIMAÇÕES VISUAIS === */
 .animation {
-  width: 300px;
-  height: 300px;
+  width: min(80%, 300px);
+  height: auto;
+  aspect-ratio: 1 / 1;
   margin: 40px auto;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   border-radius: 10px;
-  box-shadow: 0 0 30px #00f2ff;
+  box-shadow: 0 0 20px #00f2ff;
   position: relative;
   z-index: 5;
 }
@@ -150,19 +155,27 @@ body {
   width: 100%;
   height: 80vh;
   background: radial-gradient(circle, #000428, #004e92);
-  box-shadow: inset 0 0 100px #00f2ff;
+  box-shadow: inset 0 0 60px #00f2ff;
 }
 
 /* === SKETCHFAB EMBED === */
 .sketchfab-embed-wrapper {
-  box-shadow: 0 0 30px #00f2ff;
-  border-radius: 10px;
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
   overflow: hidden;
   margin: 40px auto;
-  max-width: 640px;
+  max-width: 800px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px #00f2ff;
 }
 
 .sketchfab-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   border: none;
   border-radius: 10px;
 }
@@ -170,8 +183,9 @@ body {
 /* === LASER ANIMADO SOBRE O GIF === */
 .scanner-wrapper {
   position: relative;
-  width: 300px;
-  height: 300px;
+  width: min(80%, 300px);
+  height: auto;
+  aspect-ratio: 1 / 1;
   margin: 0 auto;
 }
 
@@ -194,15 +208,15 @@ body {
 /* === LOGS DE PROCESSAMENTO === */
 .log {
   font-family: monospace;
-  font-size: 1em;
+  font-size: clamp(0.85rem, 2vw, 1em);
   color: #00f2ff;
   text-align: left;
-  max-width: 600px;
+  max-width: 800px;
   margin: 20px auto;
   padding: 10px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 10px;
-  box-shadow: 0 0 20px #00f2ff;
+  box-shadow: 0 0 15px #00f2ff;
 }
 
 /* === ANIMAÇÕES DE ENTRADA === */
@@ -226,4 +240,30 @@ body {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* === RESPONSIVIDADE === */
+
+/* Smartphones */
+@media (max-width: 480px) {
+  .container { padding: 60px 15px; }
+  .headline { font-size: 1.8rem; }
+  .subtext { font-size: 1rem; }
+  .btn, .btn.neon { font-size: 0.9rem; padding: 10px 20px; box-shadow: 0 0 10px #00f2ff; }
+}
+
+/* Tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+  .container { padding: 80px 20px; }
+  .headline { font-size: 2.2rem; }
+  .btn, .btn.neon { font-size: 1rem; padding: 12px 24px; }
+}
+
+/* TVs e telas grandes */
+@media (min-width: 1200px) {
+  .container { padding: 150px 40px; }
+  .headline { font-size: 4rem; }
+  .subtext { font-size: 1.8rem; }
+  .animation, .scanner-wrapper { width: 400px; height: 400px; }
+  .log { font-size: 1.1rem; }
 }
