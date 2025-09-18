@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulador Biometria Facial ESP32-CAM</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f2f4f8; margin:20px; }
+    h1 { text-align:center; color:#333; }
+    .container { display:flex; flex-direction:column; align-items:center; gap:20px; }
+    .flow { display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; width:100%; max-width:900px; }
+    .card { background:#fff; border-radius:12px; box-shadow:0 3px 6px rgba(0,0,0,0.1); padding:15px; text-align:center; }
+    .card img { max-width:100%; max-height:200px; border-radius:8px; }
+    .btn { padding:8px 14px; border:none; border-radius:8px; cursor:pointer; background:#0077cc; color:#fff; }
+    .btn.secondary { background:#555; }
+    .log { background:#111; color:#0f0; font-family:monospace; padding:10px; border-radius:8px; width:100%; max-width:900px; height:150px; overflow-y:auto; }
+    select, input { padding:6px; border-radius:6px; border:1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>Simulador de Biometria Facial com ESP32-CAM</h1>
+  
+  <!-- Controle de modo -->
+  <div style="margin:10px 0;display:flex;gap:8px;align-items:center;justify-content:center">
+    <label>Modo:</label>
+    <select id="mode-select">
+      <option value="simulado">Simulado</option>
+      <option value="esp32">ESP32-CAM (rede)</option>
+    </select>
+    <label>IP:</label>
+    <input id="esp32-ip" type="text" placeholder="192.168.0.42" style="width:140px" />
+    <button id="connect-esp32" class="btn secondary">Conectar/Atualizar</button>
+  </div>
+
+  <div class="container">
+    <!-- Fluxo -->
+    <div class="flow">
+      <div class="card">
+        <h3>Captura</h3>
+        <img id="capture-img" src="/mnt/data/processaimg.jpeg" alt="captura" />
+        <button id="btn-capture" class="btn">Iniciar Captura</button>
+      </div>
+
+      <div class="card">
+        <h3>Conversão ADC</h3>
+        <p id="adc-status">Aguardando...</p>
+      </div>
+
+      <div class="card">
+        <h3>Formação da Imagem</h3>
+        <canvas id="matrix-canvas" width="160" height="120" style="border:1px solid #ccc"></canvas>
+      </div>
+
+      <div class="card">
+        <h3>Compressão / Armazenamento</h3>
+        <p id="storage-status">Aguardando...</p>
+      </div>
+
+      <div class="card">
+        <h3>Processamento / Validação</h3>
+        <p id="process-status">Aguardando...</p>
+      </div>
+
+      <div class="card">
+        <h3>Abertura da Porta</h3>
+        <p id="door-status">Fechada 🚪🔒</p>
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div class="log" id="log"></div>
+  </div>
+
+  <script>
+    const modeSelect = document.getElementById('mode-select');
+    const esp32IpInput = document.getElementById('esp32-ip');
+    const connectBtn = document.getElementById('connect-esp32');
+    const captureImg = document.getElementById('capture-img');
+    const adcStatus = document.getElementById('adc-status');
+    const storageStatus = document.getElementById('storage-status');
+    const processStatus = document.getElementById('process-status');
+    const doorStatus = document.getElementById('door-status');
+    const logBox = document.getElementById('log');
+    const matrixCanvas = document.getElementById('matrix-canvas');
+    const ctx = matrixCanvas.getContext('2d');
+
+    let esp32Ip = '';
+
+    function appendLog(msg){
+      logBox.innerHTML += `> ${msg}<br>`;
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function startESP32Stream(ip){
+      const url = `http://${ip}:81/stream`;
+      captureImg.src = url;
+      appendLog(`Exibindo stream MJPEG de ${url}`);
+    }
+
+    async function captureSnapshotFromESP32(ip){
+      const url = `http://${ip}:81/capture`;
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('Falha HTTP');
+        const blob = await resp.blob();
+        const objectURL = URL.createObjectURL(blob);
+        captureImg.src = objectURL;
+        appendLog('Snapshot recebido do ESP32.');
+        return blob;
+      } catch (e){
+        appendLog('Erro snapshot: '+e.message);
+        throw e;
+      }
+    }
+
+    async function jpegToPixelMatrix(blob){
+      return new Promise((resolve)=>{
+        const img = new Image();
+        const url = URL.createObjectURL(blob);
+        img.onload = ()=>{
+          matrixCanvas.width = img.width/4;
+          matrixCanvas.height = img.height/4;
+          ctx.drawImage(img,0,0,matrixCanvas.width,matrixCanvas.height);
+          const data = ctx.getImageData(0,0,matrixCanvas.width,matrixCanvas.height).data;
+          const matrix=[];
+          for(let y=0;y<matrixCanvas.height;y++){
+            const row=[];
+            for(let x=0;x<matrixCanvas.width;x++){
+              const i=(y*matrixCanvas.width+x)*4;
+              const r=data[i],g=data[i+1],b=data[i+2];
+              const gray=Math.round(0.299*r+0.587*g+0.114*b);
+              row.push(gray);
+            }
+            matrix.push(row);
+          }
+          URL.revokeObjectURL(url);
+          resolve(matrix);
+        };
+        img.src=url;
+      });
+    }
+
+    connectBtn.addEventListener('click',()=>{
+      const mode=modeSelect.value;
+      esp32Ip=esp32IpInput.value.trim();
+      if(mode==='esp32' && !esp32Ip){appendLog('Informe o IP do ESP32.');return;}
+      if(mode==='esp32') startESP32Stream(esp32Ip);
+      else {captureImg.src='/mnt/data/processaimg.jpeg'; appendLog('Modo simulado ativo.');}
+    });
+
+    document.getElementById('btn-capture').addEventListener('click',async()=>{
+      const mode=modeSelect.value;
+      adcStatus.textContent='Convertendo...';
+      storageStatus.textContent='...';
+      processStatus.textContent='...';
+      doorStatus.textContent='Fechada 🚪🔒';
+
+      let blob=null;
+      if(mode==='esp32'){
+        try{ blob=await captureSnapshotFromESP32(esp32Ip); }catch{ return; }
+      } else {
+        appendLog('Captura simulada.');
+      }
+
+      setTimeout(()=>{
+        adcStatus.textContent='Sinal digital pronto ✅';
+        appendLog('ADC concluído.');
+      },800);
+
+      setTimeout(async()=>{
+        if(blob){
+          const matrix=await jpegToPixelMatrix(blob);
+          appendLog('Matriz formada '+matrix.length+'x'+matrix[0].length);
+        } else {
+          ctx.fillStyle='#999'; ctx.fillRect(0,0,matrixCanvas.width,matrixCanvas.height);
+        }
+      },1500);
+
+      setTimeout(()=>{
+        storageStatus.textContent='Imagem comprimida e salva 💾';
+        appendLog('Compressão/armazenamento feito.');
+      },2200);
+
+      setTimeout(()=>{
+        processStatus.textContent='Face reconhecida ✅';
+        appendLog('Validação biométrica aprovada.');
+      },3000);
+
+      setTimeout(()=>{
+        doorStatus.textContent='Porta Aberta 🚪✅';
+        appendLog('Porta liberada.');
+      },3800);
+    });
+  </script>
+</body>
+</html>
