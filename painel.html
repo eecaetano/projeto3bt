@@ -1,100 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Painel de Controle - Biometria Facial</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0077cc, #00aaff);
-      color: #fff;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      padding: 20px;
-      background: rgba(0,0,0,0.3);
-    }
-    h1 { margin: 0; }
-    .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      padding: 40px;
-    }
-    .card {
-      background: rgba(255,255,255,0.1);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: transform 0.2s;
-    }
-    .card:hover { transform: scale(1.05); }
-    .card h2 { margin: 10px 0; }
-    .card a {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 10px 15px;
-      background: #fff;
-      color: #0077cc;
-      text-decoration: none;
-      border-radius: 6px;
-      font-weight: bold;
-      transition: background 0.2s, color 0.2s;
-    }
-    .card a:hover {
-      background: #0077cc;
-      color: #fff;
-    }
-    footer {
-      margin-top: 20px;
-      padding: 10px;
-      background: rgba(0,0,0,0.3);
-      font-size: 14px;
-    }
+    :root{--bg1:#0077cc;--bg2:#00aaff;--card-bg:rgba(255,255,255,0.12);--accent:#fff}
+    *{box-sizing:border-box;font-family:Inter,system-ui,Arial,Helvetica,sans-serif}
+    body{margin:0;min-height:100vh;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--accent)}
+    header{padding:28px 20px;text-align:center;background:rgba(0,0,0,0.12)}
+    header h1{margin:0;font-size:20px}
+    header p{margin:6px 0 0;color:rgba(255,255,255,0.9)}
+    .container{padding:28px;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+    .card{background:var(--card-bg);padding:18px;border-radius:12px;backdrop-filter:blur(6px);box-shadow:0 6px 18px rgba(2,6,23,0.12);transition:transform .18s ease,box-shadow .18s}
+    .card:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(2,6,23,0.18)}
+    .card h2{margin:0 0 8px;font-size:16px}
+    .card p{margin:0;color:rgba(255,255,255,0.9)}
+    .card a{display:inline-block;margin-top:12px;padding:10px 14px;border-radius:8px;background:#fff;color:var(--bg1);text-decoration:none;font-weight:600}
+    .card a.external{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--accent)}
+    footer{padding:12px;text-align:center;color:rgba(255,255,255,0.9);background:rgba(0,0,0,0.08)}
+    @media (max-width:520px){header h1{font-size:18px}}
   </style>
 </head>
 <body>
   <header>
     <h1>📌 Painel de Controle - Biometria Facial</h1>
-    <p>Selecione uma das opções abaixo</p>
+    <p>Escolha uma ferramenta / documentação do projeto</p>
   </header>
 
-  <div class="container">
-    <div class="card">
+  <main class="container">
+    <article class="card">
       <h2>ℹ️ Saiba Mais</h2>
-      <p>Entenda o uso da biometria facial</p>
-      <a href="saibamais.html">Acessar</a>
-    </div>
+      <p>Material introdutório sobre o uso da biometria facial.</p>
+      <a href="saibamais.html" target="_blank" rel="noopener">Acessar</a>
+    </article>
 
-    <div class="card">
+    <article class="card">
       <h2>👤 Conheça</h2>
-      <p>Saiba mais sobre o projeto de biometria</p>
-      <a href="biometria.html">Acessar</a>
-    </div>
+      <p>Apresentação do projeto e objetivos.</p>
+      <a href="biometria.html" target="_blank" rel="noopener">Acessar</a>
+    </article>
 
-    <div class="card">
+    <article class="card">
       <h2>⚙️ Simulador ESP32</h2>
-      <p>Acesse o simulador de leitura facial com ESP32-CAM</p>
-      <a href="simulador.html">Acessar</a>
-    </div>
+      <p>Simulação conectada ao ESP32-CAM via IP (stream / snapshot).</p>
+      <a href="simulador.html" target="_blank" rel="noopener">Acessar</a>
+    </article>
 
-    <div class="card">
+    <article class="card">
       <h2>📷 Simulador Local</h2>
-      <p>Use a câmera do dispositivo para simulação</p>
-      <a href="simuladoruser.html">Acessar</a>
-    </div>
+      <p>Use a câmera do dispositivo (notebook/tablet/celular).</p>
+      <a href="simuladoruser.html" target="_blank" rel="noopener">Acessar</a>
+    </article>
 
-    <div class="card">
+    <article class="card">
       <h2>📝 Cadastro de Usuários</h2>
-      <p>Cadastre novos usuários e salve os dados</p>
-      <a href="cadastro_criptografado.html">Acessar</a>
-    </div>
-  </div>
+      <p>Cadastro com criptografia da imagem (JSON criptografado).</p>
+      <a href="cadastro_criptografado.html" target="_blank" rel="noopener">Acessar</a>
+    </article>
+
+    <article class="card">
+      <h2>📚 Acesso ao TCC (ref.)</h2>
+      <p>Documento de referência do projeto (TCC).</p>
+      <a class="external" href="https://drive.google.com/file/d/109OkVmNimhUmPncW79c4oZO-M95XC6JO/view?usp=sharing" target="_blank" rel="noopener noreferrer">Abrir TCC</a>
+    </article>
+  </main>
 
   <footer>
-    <p>Projeto de Biometria Facial com ESP32 & Câmera Local | 2025</p>
+    <small>Projeto de Biometria Facial · Painel central · 2025</small>
   </footer>
 </body>
 </html>
