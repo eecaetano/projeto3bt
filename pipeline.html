@@ -3,546 +3,450 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Pipeline do Processamento de Imagem</title>
-
-<!-- Fonts -->
+<title>Pipeline — Dados → Imagem (Face)</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
   :root{
-    --bg1: #020617;
-    --bg2: #081028;
-    --accent: #00f0ff;
-    --accent-2: #4cc9f0;
-    --glass: rgba(255,255,255,0.04);
-    --glass-2: rgba(255,255,255,0.03);
-    --text: #e6f7ff;
-    --muted: #9bb7c7;
-    --card-radius: 18px;
+    --bg1:#020617; --accent:#00f0ff; --accent2:#4cc9f0; --muted:#9bb7c7;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; font-family:Poppins,system-ui,Segoe UI,Roboto,Arial;
+    background: radial-gradient(1000px 600px at 10% 10%, rgba(8,16,40,0.6), transparent),
+                linear-gradient(180deg,#020617,#081028);
+    color:#e7fbff; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:28px auto;padding:20px;}
+  header{display:flex;gap:14px;align-items:center}
+  .logo{width:60px;height:60px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;transform:rotate(-6deg);box-shadow:0 10px 40px rgba(0,200,255,0.08)}
+  h1{margin:0;font-size:1.45rem}
+  p.lead{margin:6px 0 0;color:var(--muted);font-size:0.95rem}
+
+  .stage{display:grid;grid-template-columns:1fr 420px;gap:26px;margin-top:20px}
+  .visual{background:rgba(255,255,255,0.01);border-radius:16px;padding:18px;position:relative;overflow:hidden;min-height:480px;border:1px solid rgba(255,255,255,0.03)}
+  canvas#particles{position:absolute;inset:0;z-index:0}
+  .pipeline-row{position:relative;z-index:2;display:flex;gap:16px;align-items:center;justify-content:center;padding:32px}
+  .stage-card{width:150px;height:150px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform .35s,box-shadow .35s}
+  .stage-card:hover{transform:translateY(-8px);box-shadow:0 24px 60px rgba(0,200,255,0.08)}
+  .stage-icon{font-size:34px;margin-bottom:8px}
+  .stage-title{color:var(--accent);font-weight:700}
+  .stage-sub{color:var(--muted);font-size:0.82rem;text-align:center;margin-top:6px;padding:0 6px}
+  svg.connector{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+
+  /* flow dots */
+  .flow-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 8px 28px rgba(0,240,255,0.12);z-index:3;pointer-events:none}
+
+  /* right panel */
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,0.03);min-height:480px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+  .panel h2{margin:4px 0 6px;color:var(--accent2)}
+  .panel p{color:var(--muted);line-height:1.45}
+  .matrix{display:grid;grid-template-columns:repeat(8,28px);gap:6px;margin-top:10px}
+  .cell{width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);box-shadow:inset 0 -2px 0 rgba(0,0,0,0.3)}
+
+  .controls{display:flex;gap:8px;margin-top:14px}
+  .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 12px;border-radius:10px;color:var(--text);cursor:pointer;font-weight:600}
+  .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#002;border:none}
+
+  .codebox{background:#00111a;color:#bfeffd;padding:12px;border-radius:10px;overflow:auto;font-family:"JetBrains Mono",monospace;font-size:12px;border:1px solid rgba(255,255,255,0.03);max-height:180px}
+
+  /* final reveal area */
+  .reveal-area{position:absolute;right:24px;bottom:24px;width:260px;height:260px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:4}
+  .reveal-canvas{width:220px;height:220px;border-radius:8px;position:relative;overflow:hidden;background:#00121a}
+  .reveal-canvas img{display:block;max-width:100%;height:100%;object-fit:cover;opacity:0}
+  .status{margin-top:8px;color:var(--muted);font-size:0.92rem}
+
+  /* tiles (data -> image) */
+  .tiles-wrap{position:absolute;inset:0;z-index:6;pointer-events:none}
+  .tile{
+    position:absolute; width:0px;height:0px; opacity:0; will-change:transform,opacity;
+    background-repeat:no-repeat; background-size:cover; border-radius:2px; box-shadow:0 6px 18px rgba(0,0,0,0.45);
+    transform-origin:center center;
   }
 
-  html,body{height:100%;margin:0;font-family:"Poppins",system-ui,Segoe UI,Roboto,Arial; background: radial-gradient(1200px 700px at 10% 10%, rgba(8,16,40,0.6), transparent), radial-gradient(900px 500px at 90% 90%, rgba(0,120,200,0.06), transparent), linear-gradient(180deg,var(--bg1),var(--bg2)); color:var(--text); -webkit-font-smoothing:antialiased;}
-  .wrap{max-width:1200px;margin:28px auto;padding:28px;}
-  header{display:flex;align-items:center;gap:18px;margin-bottom:22px}
-  .logo{
-    width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
-    display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(0,200,255,0.08);
-    transform:rotate(-8deg);
-  }
-  .logo svg{filter:drop-shadow(0 6px 20px rgba(0,180,255,0.12));}
-  h1{font-size:1.6rem;margin:0}
-  p.lead{color:var(--muted);margin:6px 0 0;font-size:0.95rem}
-
-  /* Stage area */
-  .stage{
-    margin-top:18px;
-    display:grid;
-    grid-template-columns: 1fr 420px;
-    gap:28px;
-    align-items:start;
+  .badge{
+    margin-top:10px;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#18f0c8,#1fb9ff);color:#001;font-weight:700;box-shadow:0 8px 30px rgba(0,200,255,0.1)
   }
 
-  /* Left: pipeline canvas */
-  .visual {
-    position:relative;
-    min-height:420px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
-    border-radius:20px;
-    padding:26px;
-    overflow:hidden;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.03);
-  }
-
-  /* particle canvas covers the panel */
-  canvas#particles{ position:absolute; inset:0; z-index:0; }
-
-  /* pipeline row */
-  .pipeline-row {
-    position:relative;
-    z-index:2;
-    display:flex;
-    gap:18px;
-    align-items:center;
-    justify-content:center;
-    padding:30px 20px;
-  }
-
-  /* each card */
-  .stage-card{
-    width:160px;height:160px;border-radius:16px;background:linear-gradient(180deg,var(--glass),var(--glass-2));
-    border:1px solid rgba(255,255,255,0.06);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    box-shadow:0 6px 22px rgba(0,0,0,0.5);
-    transition:transform 0.35s cubic-bezier(.2,.9,.3,1), box-shadow 0.35s;
-    cursor:pointer;
-    position:relative;
-    overflow:visible;
-  }
-  .stage-card:hover{ transform:translateY(-10px) scale(1.04); box-shadow:0 20px 50px rgba(0,200,255,0.12); }
-  .stage-icon{ font-size:34px; margin-bottom:10px; filter:drop-shadow(0 2px 8px rgba(0,180,255,0.12)); }
-  .stage-title{ color:var(--accent); font-weight:700; letter-spacing:0.2px; font-size:0.98rem; }
-  .stage-sub{ color:var(--muted); font-size:0.82rem; margin-top:6px; text-align:center; padding:0 8px }
-
-  /* animated connector lines (SVG) */
-  svg.connector{ position:absolute; left:0; top:0; width:100%; height:100%; z-index:1; pointer-events:none; }
-
-  /* flow particle (tiny) */
-  .flow-dot{ position:absolute;width:10px;height:10px;border-radius:50%; background:var(--accent); box-shadow:0 6px 22px rgba(0,240,255,0.12); }
-
-  /* right panel details */
-  .panel {
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius: var(--card-radius);
-    padding:18px;
-    border:1px solid rgba(255,255,255,0.04);
-    min-height:420px;
-    box-shadow: 0 8px 30px rgba(2,6,20,0.5);
-  }
-  .panel h2{ margin:4px 0 6px;font-size:1.05rem;color:var(--accent-2) }
-  .panel p{ color:var(--muted); line-height:1.45 }
-  .panel .matrix { margin-top:12px; display:grid; grid-template-columns: repeat(8,24px); gap:6px; justify-content:start; }
-  .matrix .cell{ width:24px;height:24px;border-radius:4px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted); box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3); }
-
-  .controls{ display:flex; gap:8px; margin-top:18px; flex-wrap:wrap }
-  .btn{
-    background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 12px;border-radius:10px;color:var(--text);
-    cursor:pointer;font-weight:600;font-size:0.9rem; transition:all .2s; display:inline-flex; gap:8px; align-items:center;
-  }
-  .btn:hover{ transform:translateY(-4px); box-shadow: 0 10px 30px rgba(0,200,255,0.06); border-color:var(--accent-2) }
-  .btn.primary{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#002; border: none; box-shadow:0 10px 30px rgba(0,200,255,0.12) }
-
-  /* code viewer */
-  pre.codebox{ background: #00111a; color:#bfeffd; padding:12px;border-radius:10px; overflow:auto; max-height:220px; font-family:"JetBrains Mono",monospace; font-size:12.5px; border:1px solid rgba(255,255,255,0.03);}
-
-  footer.small{ margin-top:18px;color:var(--muted); font-size:0.9rem; text-align:center }
-
-  /* tooltip bubble */
-  .tooltip {
-    position:absolute; left:50%; transform:translateX(-50%); bottom:calc(100% + 12px);
-    background:rgba(2,10,20,0.9); padding:10px 12px; border-radius:10px; font-size:0.82rem; color:var(--text);
-    box-shadow:0 6px 20px rgba(0,0,0,0.6); opacity:0; pointer-events:none; transition:all .18s;
-    white-space:nowrap; border:1px solid rgba(255,255,255,0.03);
-  }
-  .stage-card:hover .tooltip{ opacity:1; transform:translateX(-50%) translateY(-6px) }
-
-  /* responsive */
-  @media (max-width:980px){
-    .stage{ grid-template-columns: 1fr; }
-    .pipeline-row{ flex-wrap:wrap; gap:12px; padding:18px; justify-content:flex-start }
-  }
+  @media (max-width:980px){ .stage{grid-template-columns:1fr; } .reveal-area{position:static;margin-top:14px;} }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo" aria-hidden>
-      <!-- stylized sensor icon -->
-      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="3" width="20" height="18" rx="4" fill="white" opacity="0.12"/>
-        <circle cx="12" cy="12" r="4.2" stroke="white" stroke-opacity="0.9" stroke-width="1.2"/>
-      </svg>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="2" y="3" width="20" height="18" rx="4" fill="white" opacity="0.12"/><circle cx="12" cy="12" r="3.6" stroke="white" stroke-width="1"/></svg>
     </div>
     <div>
-      <h1>Pipeline Futurista — Processamento de Imagem</h1>
-      <p class="lead">Visual interativo e explicativo do fluxo: captura → A/D → formação → compressão → processamento. Clique em qualquer etapa para ver detalhes e código.</p>
+      <h1>Pipeline Interativo — Dados ↔ Imagem (Reconhecimento Facial)</h1>
+      <p class="lead">Clique em “Iniciar fluxo” e veja os dados serem lidos, transformados e — no final — formarem a face. Arquivo GIF: <code>danyface.gif</code> (coloque na mesma pasta).</p>
     </div>
   </header>
 
   <section class="stage">
     <div class="visual" id="visual">
       <canvas id="particles"></canvas>
-
-      <!-- SVG connectors (animated stroke) -->
-      <svg class="connector" id="connector" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
-        <!-- drawn dynamically by JS -->
-      </svg>
+      <svg class="connector" id="connector" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true"></svg>
 
       <div class="pipeline-row" id="pipelineRow">
-        <!-- stage cards -->
-        <div class="stage-card" data-key="capture" title="Captura da Luz">
+        <div class="stage-card" data-key="capture">
           <div class="stage-icon">📸</div>
           <div class="stage-title">Captura</div>
-          <div class="stage-sub">Sensor óptico transforma luz em sinal</div>
-          <div class="tooltip">Sensor + lente → sinal elétrico analógico</div>
+          <div class="stage-sub">Sensor → sinal analógico</div>
         </div>
-
         <div class="stage-card" data-key="ad">
           <div class="stage-icon">🔲</div>
-          <div class="stage-title">Conversão A/D</div>
-          <div class="stage-sub">Sinal analógico → valores numéricos</div>
-          <div class="tooltip">Conversor A/D: quantização e amostragem</div>
+          <div class="stage-title">A/D</div>
+          <div class="stage-sub">Quantização e amostragem</div>
         </div>
-
         <div class="stage-card" data-key="formation">
           <div class="stage-icon">🧮</div>
           <div class="stage-title">Formação</div>
-          <div class="stage-sub">Matriz de pixels (0–255)</div>
-          <div class="tooltip">Criação da imagem digital (matriz)</div>
+          <div class="stage-sub">Matriz de pixels</div>
         </div>
-
         <div class="stage-card" data-key="compression">
           <div class="stage-icon">💾</div>
           <div class="stage-title">Compressão</div>
-          <div class="stage-sub">Salvar em JPEG/PNG/RAW</div>
-          <div class="tooltip">Compressão com perdas ou sem perdas</div>
+          <div class="stage-sub">Salvar / transmitir</div>
         </div>
-
         <div class="stage-card" data-key="processing">
           <div class="stage-icon">🧠</div>
           <div class="stage-title">Processamento</div>
-          <div class="stage-sub">Filtros, IA, reconhecimento</div>
-          <div class="tooltip">CPU/GPU: filtros, IA, OCR, etc.</div>
+          <div class="stage-sub">Extração / validação</div>
         </div>
       </div>
 
-      <!-- animated flow dots container -->
-      <div id="flowContainer" style="position:absolute; inset:0; z-index:3; pointer-events:none;"></div>
+      <!-- reveal face area (bottom-right) -->
+      <div class="reveal-area" id="revealArea">
+        <div class="reveal-canvas" id="revealCanvas">
+          <!-- image must be present in same folder as the HTML -->
+          <img id="faceGif" src="danyface.gif" alt="face gif">
+          <div class="tiles-wrap" id="tilesWrap"></div>
+        </div>
+        <div class="status" id="statusText">Status: aguardando execução</div>
+        <div class="badge" id="badge" style="display:none">✅ Identidade validada</div>
+      </div>
     </div>
 
-    <aside class="panel" id="panel">
-      <h2 id="panelTitle">Detalhes da Etapa</h2>
-      <p id="panelDesc">Clique em uma etapa para ver a descrição ampliada, amostra de dados (matriz de pixels) e trechos de código em Python e Java que ilustram a etapa.</p>
+    <aside class="panel">
+      <h2 id="panelTitle">Detalhes</h2>
+      <p id="panelDesc">Clique em uma etapa para ver a descrição, ou pressione <strong>Iniciar fluxo</strong> para ver todo o processo animado.</p>
 
-      <div id="matrixArea" style="margin-top:12px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <strong style="color:var(--accent)">Matriz (exemplo)</strong>
-          <small style="color:var(--muted);margin-left:auto">Valores 0–255</small>
-        </div>
-        <div class="matrix" id="matrixGrid" aria-hidden="false"></div>
+      <div style="margin-top:10px;">
+        <strong style="color:var(--accent2)">Matriz (exemplo)</strong>
+        <div class="matrix" id="matrixGrid"></div>
       </div>
 
-      <div class="controls" style="margin-top:14px;">
-        <button class="btn primary" id="playFlowBtn">▶️ Iniciar fluxo</button>
+      <div class="controls">
+        <button class="btn primary" id="startBtn">▶️ Iniciar fluxo</button>
+        <button class="btn" id="stopBtn">⏸️ Parar</button>
         <button class="btn" id="resetBtn">🔁 Resetar</button>
-        <button class="btn" id="showCodeBtn">📜 Exibir código</button>
+        <button class="btn" id="revealBtn">✨ Revelar face agora</button>
       </div>
 
-      <div style="margin-top:14px;">
-        <div id="codeView" style="display:none">
-          <h3 style="margin:6px 0 8px;color:var(--accent)">Exemplos</h3>
-          <div id="codePython" style="display:none">
-            <small style="color:var(--muted)">Python — leitura e exibição simples de matriz (PIL / numpy)</small>
-            <pre class="codebox" id="pycode">
+      <div style="margin-top:12px;">
+        <div class="codebox">
+<small style="color:var(--muted)">Snippet (Python) — leitura rápida e extração da matriz:</small>
+
+<pre style="margin:6px 0 0">
 from PIL import Image
 import numpy as np
 
-img = Image.open('exemplo.png').convert('L')  # grayscale
-arr = np.array(img)            # matriz de pixels 0-255
-print("shape:", arr.shape)
-print(arr[:6,:6])              # mostra parte da matriz
-            </pre>
-          </div>
-
-          <div id="codeJava" style="display:none">
-            <small style="color:var(--muted)">Java (JavaFX) — criar imagem a partir de matriz</small>
-            <pre class="codebox" id="javacode">
-int width = 200, height = 200;
-WritableImage wimg = new WritableImage(width, height);
-PixelWriter writer = wimg.getPixelWriter();
-for (int y = 0; y &lt; height; y++) {
-  for (int x = 0; x &lt; width; x++) {
-    int gray = (int)(Math.random()*256);
-    writer.setColor(x, y, Color.grayRgb(gray));
-  }
-}
-            </pre>
-          </div>
+img = Image.open('danyface.gif').convert('L')
+arr = np.array(img)
+print(arr.shape)
+print(arr[:6,:6])
+</pre>
         </div>
       </div>
 
-      <footer class="small">Dica: passe o mouse nas etapas para ver tooltips; clique para abrir detalhes. Botões simulam o fluxo visual.</footer>
     </aside>
   </section>
 </div>
 
 <script>
-/* ========== Utilities ========== */
-const $ = s => document.querySelector(s);
-const $$ = s => Array.from(document.querySelectorAll(s));
-
-/* ========== Particle background ========== */
+/* ============================ Particles background ============================ */
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
-let W = canvas.width = canvas.clientWidth;
-let H = canvas.height = canvas.clientHeight;
-window.addEventListener('resize', ()=>{ W = canvas.width = canvas.clientWidth; H = canvas.height = canvas.clientHeight; initParticles(); });
-
+function resizeCanvas(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+resizeCanvas(); window.addEventListener('resize', ()=>{ resizeCanvas(); initParticles(); buildConnectors(); });
+let W = canvas.width, H = canvas.height;
 let particles = [];
 function initParticles(){
+  W = canvas.width; H = canvas.height;
   particles = [];
-  const amount = Math.round((W*H)/50000);
-  for(let i=0;i<amount;i++){
-    particles.push({
-      x: Math.random()*W,
-      y: Math.random()*H,
-      r: Math.random()*1.3 + 0.4,
-      vx: (Math.random()-0.5)*0.15,
-      vy: (Math.random()-0.5)*0.15,
-      alpha: Math.random()*0.8+0.2
-    });
+  const count = Math.max(30, Math.round((W*H)/80000));
+  for(let i=0;i<count;i++){
+    particles.push({x:Math.random()*W, y:Math.random()*H, r: Math.random()*1.6+0.6, vx:(Math.random()-0.5)*0.2, vy:(Math.random()-0.5)*0.2, a: Math.random()*0.8+0.2});
   }
 }
-function updateParticles(){
+function drawParticles(){
   ctx.clearRect(0,0,W,H);
   for(const p of particles){
-    p.x += p.vx; p.y += p.vy;
-    if(p.x<0) p.x = W;
-    if(p.x>W) p.x = 0;
-    if(p.y<0) p.y = H;
-    if(p.y>H) p.y = 0;
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0) p.x=W; if(p.x>W)p.x=0; if(p.y<0)p.y=H; if(p.y>H)p.y=0;
     ctx.beginPath();
-    ctx.fillStyle = 'rgba(0,240,255,'+ (p.alpha*0.07) +')';
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fill();
+    ctx.fillStyle = 'rgba(0,240,255,'+(p.a*0.07)+')';
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
   }
+  requestAnimationFrame(drawParticles);
 }
-initParticles();
-(function loop(){ updateParticles(); requestAnimationFrame(loop); })();
+initParticles(); drawParticles();
 
-/* ========== Build connectors as SVG lines between cards ========== */
+/* ============================ Connectors (SVG) ============================ */
 const svg = document.getElementById('connector');
 function buildConnectors(){
-  // get bounding boxes, compute centers
+  svg.innerHTML = '';
+  const rect = document.getElementById('visual').getBoundingClientRect();
+  svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
   const row = document.getElementById('pipelineRow');
   const cards = Array.from(row.children);
-  // clear
-  svg.innerHTML = '';
-  // compute positions relative to svg viewport
-  const rect = document.getElementById('visual').getBoundingClientRect();
-  const viewW = rect.width, viewH = rect.height;
-  svg.setAttribute('viewBox', `0 0 ${Math.max(viewW,1000)} ${Math.max(viewH,560)}`);
-
-  // map centers
-  const centers = cards.map(c=>{
+  const centers = cards.map(c => {
     const r = c.getBoundingClientRect();
-    return { x: r.left - rect.left + r.width/2, y: r.top - rect.top + r.height/2, el:c };
+    return {x: r.left - rect.left + r.width/2, y: r.top - rect.top + r.height/2};
   });
 
-  // create path between successive centers
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML = `<linearGradient id="g1"><stop offset="0" stop-color="#4cc9f0"/><stop offset="1" stop-color="#00f0ff"/></linearGradient>`;
+  svg.appendChild(defs);
+
   for(let i=0;i<centers.length-1;i++){
     const a = centers[i], b = centers[i+1];
-    // cubic curve for nice arc
-    const dx = Math.abs(b.x - a.x);
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     const mx = (a.x + b.x)/2;
-    const controlY = Math.min(a.y,b.y) - Math.max(30, dx*0.15);
-    const d = `M ${a.x.toFixed(1)} ${a.y.toFixed(1)} C ${mx.toFixed(1)} ${controlY.toFixed(1)}, ${mx.toFixed(1)} ${controlY.toFixed(1)}, ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+    const controlY = Math.min(a.y,b.y)-40;
+    const d = `M ${a.x} ${a.y} C ${mx} ${controlY} ${mx} ${controlY} ${b.x} ${b.y}`;
     path.setAttribute('d', d);
-    path.setAttribute('stroke', 'rgba(0,240,255,0.12)');
-    path.setAttribute('stroke-width','4');
+    path.setAttribute('stroke', 'rgba(0,240,255,0.14)');
+    path.setAttribute('stroke-width','3');
     path.setAttribute('fill','none');
-    path.setAttribute('stroke-linecap','round');
-    path.setAttribute('stroke-linejoin','round');
-    // animated dashed highlight
-    const highlight = document.createElementNS('http://www.w3.org/2000/svg','path');
-    highlight.setAttribute('d', d);
-    highlight.setAttribute('stroke','url(#grad1)');
-    highlight.setAttribute('stroke-width','3');
-    highlight.setAttribute('fill','none');
-    highlight.setAttribute('stroke-linecap','round');
-    highlight.setAttribute('stroke-dasharray','120');
-    highlight.setAttribute('stroke-dashoffset','120');
-    highlight.style.transition = 'stroke-dashoffset 1.8s linear';
     svg.appendChild(path);
-    svg.appendChild(highlight);
+    const h = document.createElementNS('http://www.w3.org/2000/svg','path');
+    h.setAttribute('d', d); h.setAttribute('stroke','url(#g1)'); h.setAttribute('stroke-width','2.5');
+    h.setAttribute('stroke-dasharray','120'); h.setAttribute('stroke-dashoffset','120');
+    svg.appendChild(h);
   }
-
-  // gradient defs
-  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
-  defs.innerHTML = `
-    <linearGradient id="grad1" x1="0" x2="1">
-      <stop offset="0" stop-color="rgba(76,201,240,1)" />
-      <stop offset="1" stop-color="rgba(0,240,255,0.9)" />
-    </linearGradient>`;
-  svg.prepend(defs);
 }
+setTimeout(buildConnectors, 200);
 
-/* initial build after small delay so layout computed */
-setTimeout(buildConnectors, 220);
-window.addEventListener('resize', ()=>{ setTimeout(buildConnectors,160); });
+/* animate connector highlights */
+setInterval(()=>{ const hs = svg.querySelectorAll('path[stroke-dasharray]'); hs.forEach((h,i)=>{ let cur=parseFloat(h.getAttribute('stroke-dashoffset')||0); h.setAttribute('stroke-dashoffset', (cur-3)%240); }); },60);
 
-/* ========== Flow animation between nodes ========== */
-let flowRunning = false;
-const flowContainer = document.getElementById('flowContainer');
+/* ============================ Flow animation ============================ */
+const flowContainer = document.createElement('div'); flowContainer.style.position='absolute'; flowContainer.style.inset='0'; flowContainer.style.zIndex=3; flowContainer.style.pointerEvents='none';
+document.getElementById('visual').appendChild(flowContainer);
 
-function animateFlowOnce(){
-  const row = document.getElementById('pipelineRow');
-  const cards = Array.from(row.children);
-  // centers
+function animateFlowStep(fromEl, toEl, delay=0){
   const rect = document.getElementById('visual').getBoundingClientRect();
-  const centers = cards.map(c=>{
-    const r = c.getBoundingClientRect();
-    return { x: r.left - rect.left + r.width/2, y: r.top - rect.top + r.height/2 };
-  });
-
-  // spawn small dots moving along path
-  function animateAlong(p0,p1,delay, duration=1100){
-    const dot = document.createElement('div');
-    dot.className = 'flow-dot';
-    flowContainer.appendChild(dot);
-    dot.style.left = (p0.x - 5) + 'px';
-    dot.style.top = (p0.y - 5) + 'px';
-    dot.style.opacity = '0';
-    setTimeout(()=>{
-      dot.style.opacity = '1';
-      const start = performance.now();
-      (function frame(t){
-        const tnorm = Math.min(1,(t-start)/duration);
-        // ease
-        const e = (--tnorm)*tnorm*tnorm + 1;
-        const x = p0.x + (p1.x - p0.x)*e;
-        const y = p0.y + (p1.y - p0.y)*e - Math.sin(e*Math.PI)*18; // little arc
-        dot.style.left = (x - 5) + 'px';
-        dot.style.top = (y - 5) + 'px';
-        if(performance.now() - start < duration) requestAnimationFrame(frame);
-        else dot.remove();
-      })(performance.now());
-    }, delay);
-  }
-
-  // chain
-  const total = centers.length;
-  for(let i=0;i<total-1;i++){
-    animateAlong(centers[i], centers[i+1], i*180);
-  }
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  const p0 = {x: a.left - rect.left + a.width/2, y: a.top - rect.top + a.height/2};
+  const p1 = {x: b.left - rect.left + b.width/2, y: b.top - rect.top + b.height/2};
+  const dot = document.createElement('div'); dot.className='flow-dot'; flowContainer.appendChild(dot);
+  dot.style.left=(p0.x-5)+'px'; dot.style.top=(p0.y-5)+'px'; dot.style.opacity='0';
+  setTimeout(()=>{
+    dot.style.opacity='1';
+    const start = performance.now();
+    const dur = 1000;
+    (function frame(now){
+      const t = Math.min(1,(now-start)/dur);
+      const ease = (--t)*t*t + 1; // ease out
+      const x = p0.x + (p1.x-p0.x)*ease;
+      const y = p0.y + (p1.y-p0.y)*ease - Math.sin(ease*Math.PI)*18;
+      dot.style.left = (x-5)+'px'; dot.style.top=(y-5)+'px';
+      if(performance.now()-start < dur) requestAnimationFrame(frame);
+      else setTimeout(()=>dot.remove(),80);
+    })(performance.now());
+  }, delay);
 }
 
+/* orchestrate sequence */
 let flowInterval = null;
-document.getElementById('playFlowBtn').addEventListener('click', ()=>{
-  if(flowRunning){ flowRunning=false; document.getElementById('playFlowBtn').textContent='▶️ Iniciar fluxo'; clearInterval(flowInterval); }
-  else { flowRunning=true; document.getElementById('playFlowBtn').textContent='⏸️ Parar fluxo'; animateFlowOnce(); flowInterval = setInterval(animateFlowOnce, 900); }
-});
+let running=false;
+const startBtn = document.getElementById('startBtn'), stopBtn = document.getElementById('stopBtn'), resetBtn = document.getElementById('resetBtn');
+const cards = Array.from(document.querySelectorAll('.stage-card'));
+const statusText = document.getElementById('statusText');
+const badge = document.getElementById('badge');
 
-/* reset button */
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  flowRunning=false; document.getElementById('playFlowBtn').textContent='▶️ Iniciar fluxo'; clearInterval(flowInterval);
-  flowContainer.innerHTML='';
-});
-
-/* ========== Stage interactions & panel updates ========== */
-const cards = Array.from($$('.stage-card'));
-const panelTitle = $('#panelTitle');
-const panelDesc = $('#panelDesc');
-const matrixGrid = $('#matrixGrid');
-const codeView = $('#codeView');
-const pythonBlock = $('#codePython');
-const javaBlock = $('#codeJava');
-
-const details = {
-  capture: {
-    title: 'Captura da Luz',
-    desc: 'A luz da cena é focada pela lente e atinge o sensor (CMOS/CCD). O sensor converte fótons em sinal elétrico analógico; ganho, ruído e exposição afetam o sinal.',
-    matrix: smallMatrix(8,8),
-    showPython: true, showJava: false
-  },
-  ad: {
-    title: 'Conversão Analógico → Digital (A/D)',
-    desc: 'O conversor A/D amostra o sinal e o quantiza em níveis discretos (por exemplo 0–255 para 8 bits). Aqui surgem efeitos de quantização e aliasing se parâmetros forem inadequados.',
-    matrix: smallMatrix(8,8,true),
-    showPython: true, showJava: false
-  },
-  formation: {
-    title: 'Formação da Imagem (Matriz de Pixels)',
-    desc: 'A matriz resultante organiza valores de intensidade por pixel. Em imagens coloridas há 3 canais (R,G,B) ou um canal por pixel em escala de cinza.',
-    matrix: smallMatrix(8,8),
-    showPython: true, showJava: true
-  },
-  compression: {
-    title: 'Compressão & Armazenamento',
-    desc: 'Compressão com perdas (JPEG) reduz tamanho sacrificando parte da informação; sem perda (PNG, RAW) preserva a qualidade. Metadados e cabeçalhos descrevem a imagem em arquivo.',
-    matrix: smallMatrix(8,8,false,true),
-    showPython: false, showJava: true
-  },
-  processing: {
-    title: 'Processamento (Filtros & IA)',
-    desc: 'Etapa final: filtros, detecção de bordas, ajuste de contraste, redes neurais para reconhecimento ou segmentação. Normalmente usa-se CPU/GPU especializadas.',
-    matrix: smallMatrix(8,8),
-    showPython: true, showJava: true
+startBtn.addEventListener('click', ()=>{
+  if(running) return;
+  running=true; statusText.textContent='Status: executando...';
+  let i=0;
+  function runOnce(){
+    // animate dot from stage i to i+1
+    if(i < cards.length -1){
+      animateFlowStep(cards[i], cards[i+1], 60);
+      highlightCard(cards[i+1]);
+      i++;
+      setTimeout(runOnce, 700);
+    } else {
+      // reached end: trigger reveal
+      triggerReveal();
+      running=false;
+      statusText.textContent='Status: processamento finalizado';
+      badge.style.display='inline-block';
+    }
   }
-};
+  highlightCard(cards[0]); runOnce();
+});
 
+stopBtn.addEventListener('click', ()=>{
+  running=false; statusText.textContent='Status: pausado';
+});
+
+resetBtn.addEventListener('click', ()=>{
+  running=false; statusText.textContent='Status: aguardando execução';
+  badge.style.display='none';
+  clearTiles();
+});
+
+/* clicking stages shows info and sample matrix */
+const matrixGrid = document.getElementById('matrixGrid');
+const sampleMatrices = {
+  capture: smallMatrix(8,8),
+  ad: smallMatrix(8,8,true),
+  formation: smallMatrix(8,8),
+  compression: smallMatrix(8,8,false,true),
+  processing: smallMatrix(8,8)
+};
+document.querySelectorAll('.stage-card').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    const key = c.getAttribute('data-key');
+    showMatrix(sampleMatrices[key]);
+  });
+});
+function showMatrix(m){
+  matrixGrid.innerHTML='';
+  matrixGrid.style.gridTemplateColumns = `repeat(${m.cols},28px)`;
+  m.data.forEach(v=>{
+    const d = document.createElement('div'); d.className='cell'; d.textContent=v; 
+    if(v>200) d.style.background='linear-gradient(180deg, rgba(0,240,255,0.14), rgba(0,120,255,0.06))';
+    matrixGrid.appendChild(d);
+  });
+}
+/* smallMatrix generator (same as previous) */
 function smallMatrix(cols, rows, noisy=false, quant=true){
-  // returns flattened array rows*cols
   const r = rows || cols;
   const arr = [];
   for(let y=0;y<r;y++){
     for(let x=0;x<cols;x++){
       let v = Math.round( (Math.sin((x+1)*(y+1))*0.5 + 0.5) * 255 );
       if(noisy) v = Math.min(255, Math.max(0, v + Math.round((Math.random()-0.5)*60)));
-      if(!quant) v = Math.round(v/16)*16; // coarser
+      if(!quant) v = Math.round(v/16)*16;
       arr.push(v);
     }
   }
   return {cols, rows:r, data:arr};
 }
+showMatrix(smallMatrix(8,8));
 
-function showDetails(key){
-  const info = details[key];
-  panelTitle.textContent = info.title;
-  panelDesc.textContent = info.desc;
-  // populate matrix
-  matrixGrid.innerHTML = '';
-  const c = info.matrix;
-  matrixGrid.style.gridTemplateColumns = `repeat(${c.cols}, 24px)`;
-  for(let i=0;i<c.data.length;i++){
-    const cell = document.createElement('div');
-    cell.className = 'cell';
-    cell.textContent = c.data[i];
-    // highlight larger values
-    const v = c.data[i];
-    if(v > 200) cell.style.background = 'linear-gradient(180deg, rgba(0,240,255,0.12), rgba(0,120,255,0.06))';
-    if(v < 50) cell.style.background = 'rgba(255,255,255,0.02)';
-    matrixGrid.appendChild(cell);
-  }
-  // show code
-  codeView.style.display = 'block';
-  pythonBlock.style.display = info.showPython ? 'block' : 'none';
-  javaBlock.style.display = info.showJava ? 'block' : 'none';
+/* highlight card */
+function highlightCard(el){
+  document.querySelectorAll('.stage-card').forEach(x=>x.style.boxShadow='');
+  el.style.boxShadow='0 30px 70px rgba(0,200,255,0.12)';
 }
 
-/* attach click handlers */
-cards.forEach(c=>{
-  c.addEventListener('click', ()=>{
-    cards.forEach(x=>x.style.boxShadow='');
-    c.style.boxShadow = '0 30px 70px rgba(0,200,255,0.1)';
-    const key = c.getAttribute('data-key');
-    showDetails(key);
-    // pulse connector highlight: animate stroke-dashoffset on highlights
-    const highlights = svg.querySelectorAll('path[stroke-dasharray]');
-    highlights.forEach((h, idx)=> {
-      h.style.transition = 'none';
-      h.setAttribute('stroke-dashoffset','120');
-      setTimeout(()=>{ h.style.transition = 'stroke-dashoffset 1.3s linear'; h.setAttribute('stroke-dashoffset','0'); }, idx*80);
-    });
-  });
-});
+/* ==================== Tiles reveal: transform data -> image ==================== */
+const tilesWrap = document.getElementById('tilesWrap');
+const faceImg = document.getElementById('faceGif');
+const revealCanvas = document.getElementById('revealCanvas');
+const revealRect = revealCanvas.getBoundingClientRect();
 
-// default show first
-setTimeout(()=>{ showDetails('capture'); cards[0].style.boxShadow='0 30px 70px rgba(0,200,255,0.1)'; }, 240);
+/* build tiles grid and animate them to assemble into face */
+function triggerReveal(tileCountX=24, tileCountY=24){
+  clearTiles();
+  badge.style.display='none';
+  statusText.textContent='Status: revelando imagem a partir dos dados...';
 
-/* show/hide code area */
-$('#showCodeBtn').addEventListener('click', ()=>{
-  if(codeView.style.display === 'block' && pythonBlock.style.display === 'none' && javaBlock.style.display === 'none'){
-    // nothing to show
-    alert('Nenhum snippet disponível para esta etapa.');
-    return;
+  // ensure image loaded to know dimensions
+  if(!faceImg.complete){
+    faceImg.onload = ()=>{ buildTiles(tileCountX,tileCountY); }
+  } else buildTiles(tileCountX,tileCountY);
+}
+
+function clearTiles(){
+  tilesWrap.innerHTML='';
+}
+
+function buildTiles(nx, ny){
+  const wrap = tilesWrap;
+  const bounds = revealCanvas.getBoundingClientRect();
+  const width = bounds.width, height = bounds.height;
+  // set background-size for tiles: they will use the image as background with cover size equal to whole canvas
+  // create tile DOM elements with initial "data" look (numbers) and random positions
+  const tileW = Math.ceil(width / nx);
+  const tileH = Math.ceil(height / ny);
+
+  // position origin for final grid (centered inside revealCanvas)
+  const offsetLeft = 0;
+  const offsetTop = 0;
+
+  // precompute background-size values (we want to map the full image to tile backgrounds)
+  const bgSize = `${width}px ${height}px`;
+
+  const tiles = [];
+  for(let j=0;j<ny;j++){
+    for(let i=0;i<nx;i++){
+      const tx = offsetLeft + i*tileW;
+      const ty = offsetTop + j*tileH;
+      const bgPosX = -tx + 'px';
+      const bgPosY = -ty + 'px';
+
+      const t = document.createElement('div');
+      t.className='tile';
+      t.style.width = tileW + 'px';
+      t.style.height = tileH + 'px';
+      t.style.left = (Math.random()* (revealCanvas.clientWidth*1.6) - revealCanvas.clientWidth*0.3) + 'px';
+      t.style.top = (Math.random()* (revealCanvas.clientHeight*1.6) - revealCanvas.clientHeight*0.3) + 'px';
+      t.style.opacity = '0';
+      t.style.transform = `scale(${Math.random()*0.6+0.4}) rotate(${(Math.random()-0.5)*80}deg)`;
+      // show a numeric label to simulate "dados"
+      t.innerHTML = `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:JetBrains Mono,monospace;color:rgba(255,255,255,0.85);font-size:${Math.max(10,Math.floor(tileW/4))}px">${Math.floor(Math.random()*256)}</div>`;
+      // background-image points to GIF file and background-position maps to reveal the proper fragment
+      t.style.backgroundImage = `url('danyface.gif')`;
+      t.style.backgroundSize = bgSize;
+      t.style.backgroundPosition = `${bgPosX} ${bgPosY}`;
+      t.style.borderRadius = '4px';
+      wrap.appendChild(t);
+
+      // store final coords
+      tiles.push({el:t, fx:tx, fy:ty});
+    }
   }
-  // toggle visibility of the code view area
-  codeView.style.display = (codeView.style.display === 'none') ? 'block' : 'none';
-});
 
-/* make connectors animate continuously (dashoffset cycles) */
-setInterval(()=>{
-  const highlights = svg.querySelectorAll('path[stroke-dasharray]');
-  highlights.forEach((h, idx)=>{
-    try{
-      const cur = parseFloat(h.getAttribute('stroke-dashoffset') || '0');
-      const next = (cur - 2.5);
-      h.setAttribute('stroke-dashoffset', next);
-    }catch(e){}
+  // animate tiles into place (staggered)
+  tiles.forEach((tile, idx)=>{
+    const delay = idx * 8 + Math.random()*150;
+    setTimeout(()=>{
+      tile.el.style.transition = 'all 900ms cubic-bezier(.2,.9,.25,1), opacity 220ms';
+      tile.el.style.left = tile.fx + 'px'; tile.el.style.top = tile.fy + 'px';
+      tile.el.style.opacity = '1'; tile.el.style.transform = 'scale(1) rotate(0deg)';
+      // after arrival, fade the numeric overlay and let background show
+      setTimeout(()=>{
+        const overlay = tile.el.firstElementChild;
+        if(overlay) overlay.style.transition='opacity 420ms'; overlay.style.opacity='0';
+      }, 320);
+    }, delay);
   });
-}, 80);
+
+  // after all tiles assemble, reveal image underneath and show badge
+  setTimeout(()=>{
+    // show actual gif (set opacity)
+    faceImg.style.transition='opacity 420ms'; faceImg.style.opacity='1';
+    statusText.textContent='Status: imagem formada — extraindo características...';
+    setTimeout(()=>{ statusText.textContent='Status: validação concluída'; badge.style.display='inline-block'; }, 900);
+  }, tiles.length * 8 + 900);
+}
+
+/* quick button to reveal immediately */
+document.getElementById('revealBtn').addEventListener('click', ()=>{ triggerReveal(28,28); });
+
+/* auto build connectors after small delay (layout stabilized) */
+setTimeout(()=>{ buildConnectors(); }, 260);
+
+/* clicking processing card triggers reveal */
+document.querySelector('[data-key="processing"]').addEventListener('click', ()=>{ triggerReveal(26,26); });
+
+/* keep svg connectors updating on resize */
+window.addEventListener('resize', ()=>{ setTimeout(buildConnectors,120); });
 
 </script>
 </body>
