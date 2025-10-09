@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline Futurista de Processamento de Imagem</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at center, #0a0f1f, #000);
+    color: #fff;
+    text-align: center;
+    overflow-x: hidden;
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  h1 {
+    font-size: 2.2em;
+    margin-top: 40px;
+    color: #4cc9f0;
+    text-shadow: 0 0 10px #00f7ff;
+    letter-spacing: 1px;
+  }
+
+  .pipeline {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    margin-top: 60px;
+    position: relative;
+  }
+
+  .etapa {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    width: 180px;
+    height: 180px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0,255,255,0.1);
+    transition: all 0.6s ease;
+    position: relative;
+  }
+
+  .etapa:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 35px #00f7ff;
+    border-color: #00f7ff;
+  }
+
+  .icone {
+    font-size: 45px;
+    margin-top: 15px;
+  }
+
+  .etapa p {
+    font-size: 0.9em;
+    opacity: 0.8;
+    margin-top: 15px;
+  }
+
+  .etapa span {
+    display: block;
+    font-weight: 600;
+    color: #00f7ff;
+    font-size: 1.1em;
+  }
+
+  .seta {
+    font-size: 40px;
+    color: #00f7ff;
+    animation: fluxo 2s infinite linear;
+  }
+
+  @keyframes fluxo {
+    0% { opacity: 0.3; transform: translateY(0px); }
+    50% { opacity: 1; transform: translateY(-8px); }
+    100% { opacity: 0.3; transform: translateY(0px); }
+  }
+
+  /* Glow animado das etapas ativas */
+  .ativo {
+    box-shadow: 0 0 40px #00f7ff, 0 0 80px #007bff inset;
+    background: linear-gradient(145deg, rgba(0,255,255,0.1), rgba(0,255,255,0.02));
+    border-color: #00f7ff;
+  }
+
+  footer {
+    margin-top: 60px;
+    font-size: 0.85em;
+    color: #888;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 800px) {
+    .pipeline {
+      flex-direction: column;
+      gap: 30px;
+    }
+    .seta {
+      transform: rotate(90deg);
+      animation: none;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>🚀 Pipeline Futurista de Processamento de Imagem</h1>
+
+  <div class="pipeline">
+    <div class="etapa ativo">
+      <div class="icone">📸</div>
+      <span>Captura da Luz</span>
+      <p>O sensor óptico converte luz em sinal elétrico analógico.</p>
+    </div>
+    <div class="seta">➡️</div>
+
+    <div class="etapa">
+      <div class="icone">🔲</div>
+      <span>Conversão A/D</span>
+      <p>Conversor analógico-digital transforma sinais em valores numéricos.</p>
+    </div>
+    <div class="seta">➡️</div>
+
+    <div class="etapa">
+      <div class="icone">🧮</div>
+      <span>Formação da Imagem</span>
+      <p>Criação da matriz de pixels (0–255) representando intensidade e cor.</p>
+    </div>
+    <div class="seta">➡️</div>
+
+    <div class="etapa">
+      <div class="icone">💾</div>
+      <span>Compressão</span>
+      <p>Redução do tamanho e armazenamento em formatos como JPEG ou PNG.</p>
+    </div>
+    <div class="seta">➡️</div>
+
+    <div class="etapa">
+      <div class="icone">🧠</div>
+      <span>Processamento</span>
+      <p>Filtros, IA, reconhecimento facial, aprimoramento de imagem, etc.</p>
+    </div>
+  </div>
+
+  <footer>✨ Pipeline visual interativo desenvolvido com HTML, CSS e JavaScript.</footer>
+
+  <script>
+    const etapas = document.querySelectorAll('.etapa');
+    let idx = 0;
+
+    setInterval(() => {
+      etapas.forEach(e => e.classList.remove('ativo'));
+      etapas[idx].classList.add('ativo');
+      idx = (idx + 1) % etapas.length;
+    }, 2000);
+  </script>
+</body>
+</html>
