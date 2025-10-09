@@ -70,126 +70,149 @@
     <div class="log" id="log"></div>
   </div>
 
-  <script>
-    const modeSelect = document.getElementById('mode-select');
-    const esp32IpInput = document.getElementById('esp32-ip');
-    const connectBtn = document.getElementById('connect-esp32');
-    const captureImg = document.getElementById('capture-img');
-    const adcStatus = document.getElementById('adc-status');
-    const storageStatus = document.getElementById('storage-status');
-    const processStatus = document.getElementById('process-status');
-    const doorStatus = document.getElementById('door-status');
-    const logBox = document.getElementById('log');
-    const matrixCanvas = document.getElementById('matrix-canvas');
-    const ctx = matrixCanvas.getContext('2d');
+<script>
+  const modeSelect = document.getElementById('mode-select');
+  const esp32IpInput = document.getElementById('esp32-ip');
+  const connectBtn = document.getElementById('connect-esp32');
+  const captureImg = document.getElementById('capture-img');
+  const adcStatus = document.getElementById('adc-status');
+  const storageStatus = document.getElementById('storage-status');
+  const processStatus = document.getElementById('process-status');
+  const doorStatus = document.getElementById('door-status');
+  const logBox = document.getElementById('log');
+  const matrixCanvas = document.getElementById('matrix-canvas');
+  const ctx = matrixCanvas.getContext('2d');
 
-    let esp32Ip = '';
+  const ESP32_PORT = 8080; // Porta do emulador ESP32
+  let esp32Ip = '';
 
-    function appendLog(msg){
-      logBox.innerHTML += `> ${msg}<br>`;
-      logBox.scrollTop = logBox.scrollHeight;
+  function appendLog(msg) {
+    logBox.innerHTML += `> ${msg}<br>`;
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  function startESP32Stream(ip) {
+    const url = `http://${ip}:${ESP32_PORT}/stream`;
+    captureImg.src = url;
+    appendLog(`Exibindo stream MJPEG de ${url}`);
+  }
+
+  async function captureSnapshotFromESP32(ip) {
+    const url = `http://${ip}:${ESP32_PORT}/capture`;
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('Falha HTTP');
+      const blob = await resp.blob();
+      const objectURL = URL.createObjectURL(blob);
+      captureImg.src = objectURL;
+      appendLog('Snapshot recebido do ESP32.');
+      return blob;
+    } catch (e) {
+      appendLog('Erro snapshot: ' + e.message);
+      throw e;
     }
+  }
 
-    function startESP32Stream(ip){
-      const url = `http://${ip}:81/stream`;
-      captureImg.src = url;
-      appendLog(`Exibindo stream MJPEG de ${url}`);
-    }
-
-    async function captureSnapshotFromESP32(ip){
-      const url = `http://${ip}:81/capture`;
-      try {
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error('Falha HTTP');
-        const blob = await resp.blob();
-        const objectURL = URL.createObjectURL(blob);
-        captureImg.src = objectURL;
-        appendLog('Snapshot recebido do ESP32.');
-        return blob;
-      } catch (e){
-        appendLog('Erro snapshot: '+e.message);
-        throw e;
-      }
-    }
-
-    async function jpegToPixelMatrix(blob){
-      return new Promise((resolve)=>{
-        const img = new Image();
-        const url = URL.createObjectURL(blob);
-        img.onload = ()=>{
-          matrixCanvas.width = img.width/4;
-          matrixCanvas.height = img.height/4;
-          ctx.drawImage(img,0,0,matrixCanvas.width,matrixCanvas.height);
-          const data = ctx.getImageData(0,0,matrixCanvas.width,matrixCanvas.height).data;
-          const matrix=[];
-          for(let y=0;y<matrixCanvas.height;y++){
-            const row=[];
-            for(let x=0;x<matrixCanvas.width;x++){
-              const i=(y*matrixCanvas.width+x)*4;
-              const r=data[i],g=data[i+1],b=data[i+2];
-              const gray=Math.round(0.299*r+0.587*g+0.114*b);
-              row.push(gray);
-            }
-            matrix.push(row);
+  async function jpegToPixelMatrix(blob) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(blob);
+      img.onload = () => {
+        matrixCanvas.width = img.width / 4;
+        matrixCanvas.height = img.height / 4;
+        ctx.drawImage(img, 0, 0, matrixCanvas.width, matrixCanvas.height);
+        const data = ctx.getImageData(0, 0, matrixCanvas.width, matrixCanvas.height).data;
+        const matrix = [];
+        for (let y = 0; y < matrixCanvas.height; y++) {
+          const row = [];
+          for (let x = 0; x < matrixCanvas.width; x++) {
+            const i = (y * matrixCanvas.width + x) * 4;
+            const r = data[i], g = data[i + 1], b = data[i + 2];
+            const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+            row.push(gray);
           }
-          URL.revokeObjectURL(url);
-          resolve(matrix);
-        };
-        img.src=url;
-      });
+          matrix.push(row);
+        }
+        URL.revokeObjectURL(url);
+        resolve(matrix);
+      };
+      img.src = url;
+    });
+  }
+
+  connectBtn.addEventListener('click', () => {
+    const mode = modeSelect.value;
+    esp32Ip = esp32IpInput.value.trim();
+
+    if (mode === 'esp32' && !esp32Ip) {
+      appendLog('Informe o IP do ESP32.');
+      return;
     }
 
-    connectBtn.addEventListener('click',()=>{
-      const mode=modeSelect.value;
-      esp32Ip=esp32IpInput.value.trim();
-      if(mode==='esp32' && !esp32Ip){appendLog('Informe o IP do ESP32.');return;}
-      if(mode==='esp32') startESP32Stream(esp32Ip);
-      else {captureImg.src='/mnt/data/processaimg.jpeg'; appendLog('Modo simulado ativo.');}
-    });
+    if (mode === 'esp32') {
+      startESP32Stream(esp32Ip);
+    } else {
+      captureImg.src = '/mnt/data/processaimg.jpeg';
+      appendLog('Modo simulado ativo.');
+    }
+  });
 
-    document.getElementById('btn-capture').addEventListener('click',async()=>{
-      const mode=modeSelect.value;
-      adcStatus.textContent='Convertendo...';
-      storageStatus.textContent='...';
-      processStatus.textContent='...';
-      doorStatus.textContent='Fechada 🚪🔒';
+  document.getElementById('btn-capture').addEventListener('click', async () => {
+    const mode = modeSelect.value;
 
-      let blob=null;
-      if(mode==='esp32'){
-        try{ blob=await captureSnapshotFromESP32(esp32Ip); }catch{ return; }
-      } else {
-        appendLog('Captura simulada.');
+    adcStatus.textContent = 'Convertendo...';
+    storageStatus.textContent = '...';
+    processStatus.textContent = '...';
+    doorStatus.textContent = 'Fechada 🚪🔒';
+
+    let blob = null;
+
+    if (mode === 'esp32') {
+      try {
+        blob = await captureSnapshotFromESP32(esp32Ip);
+      } catch {
+        return;
       }
+    } else {
+      appendLog('Captura simulada.');
+    }
 
-      setTimeout(()=>{
-        adcStatus.textContent='Sinal digital pronto ✅';
-        appendLog('ADC concluído.');
-      },800);
+    // ADC
+    setTimeout(() => {
+      adcStatus.textContent = 'Sinal digital pronto ✅';
+      appendLog('ADC concluído.');
+    }, 800);
 
-      setTimeout(async()=>{
-        if(blob){
-          const matrix=await jpegToPixelMatrix(blob);
-          appendLog('Matriz formada '+matrix.length+'x'+matrix[0].length);
-        } else {
-          ctx.fillStyle='#999'; ctx.fillRect(0,0,matrixCanvas.width,matrixCanvas.height);
-        }
-      },1500);
+    // Processamento
+    setTimeout(async () => {
+      if (blob) {
+        const matrix = await jpegToPixelMatrix(blob);
+        appendLog(`Matriz formada ${matrix.length}x${matrix[0].length}`);
+      } else {
+        ctx.fillStyle = '#999';
+        ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+      }
+    }, 1500);
 
-      setTimeout(()=>{
-        storageStatus.textContent='Imagem comprimida e salva 💾';
-        appendLog('Compressão/armazenamento feito.');
-      },2200);
+    // Armazenamento
+    setTimeout(() => {
+      storageStatus.textContent = 'Imagem comprimida e salva 💾';
+      appendLog('Compressão/armazenamento feito.');
+    }, 2200);
 
-      setTimeout(()=>{
-        processStatus.textContent='Face reconhecida ✅';
-        appendLog('Validação biométrica aprovada.');
-      },3000);
+    // Reconhecimento facial
+    setTimeout(() => {
+      processStatus.textContent = 'Face reconhecida ✅';
+      appendLog('Validação biométrica aprovada.');
+    }, 3000);
 
-      setTimeout(()=>{
-        doorStatus.textContent='Porta Aberta 🚪✅';
-        appendLog('Porta liberada.');
-      },3800);
-    });
-  </script>
+    // Liberação da porta
+    setTimeout(() => {
+      doorStatus.textContent = 'Porta Aberta 🚪✅';
+      appendLog('Porta liberada.');
+    }, 3800);
+  });
+</script>
+
 </body>
 </html>
