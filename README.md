@@ -74,3 +74,5 @@ projeto3bt/
 🔒 **projeto3bt – explorando a biometria facial para controle de acesso inteligente**  
 
 👉 [Acessar no GitHub Pages](https://eecaetano.github.io/projeto3bt/)  
+
+👉 ou copie o link e cole no seu navegador: https://eecaetano.github.io/projeto3bt/
