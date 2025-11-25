@@ -1,0 +1,124 @@
+html
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Leitura Facial 3D - Unificado</title>
+  
+  <!-- Estilos -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Fontes e ícones opcionais -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Ícone da aba -->
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+  <div class="container">
+
+    <!-- === ETAPA 1: CAPTAÇÃO DA IMAGEM === -->
+    <div id="step1" class="biometria">
+      <h1>📷 Etapa 1: Captação da imagem</h1>
+      <p>É realizada por meio da câmera OV2640 de 2MP do ESP32</p>
+      <div class="scanner">
+        <p>Simulação de Escaneamento Facial</p>
+        <!-- GIF com laser animado -->
+        <div class="scanner-wrapper">
+          <div class="laser"></div>
+          <div class="animation face-scan"></div>
+        </div>
+        <!-- O botão agora chama uma função JS para avançar -->
+        <button onclick="nextStep(2)" class="btn" id="processar-btn" style="display: none;">Processamento de Dados</button>
+      </div>
+    </div>
+
+    <!-- === ETAPA 2: PROCESSAMENTO INTELIGENTE (Inicialmente escondida) === -->
+    <div id="step2" class="data-flow" style="display: none;">
+      <h1>💾 Etapa 2: Processamento Inteligente</h1>
+      <p>Os dados estão sendo convertidos e enviados para o servidor da escola via ESP32 com Wi-Fi...</p>
+      <!-- GIF de transmissão real via ESP32 -->
+      <div class="animation data-stream"></div>
+      <!-- Texto dinâmico simulando logs -->
+      <div id="log-output" class="log"></div>
+      <!-- Botão que aparece após o processamento -->
+      <button onclick="nextStep(3)" class="btn" id="acesso-btn" style="display: none;">Do processamento ao Acesso</button>
+    </div>
+
+    <!-- === ETAPA 3: A PORTA É ABERTA (Inicialmente escondida) === -->
+    <div id="step3" class="door" style="display: none;">
+      <h1>🔓 Etapa Final: A Porta é aberta</h1>
+      <p>O acesso é liberado após a validação dos dados.</p>
+      <!-- GIF atualizado da porta se abrindo -->
+      <div class="animation door-open"></div>
+      <br><br>
+      <!-- O botão agora chama uma função JS para reiniciar -->
+      <button onclick="nextStep(1)" class="btn">Voltar ao Início</button>
+    </div>
+
+  </div>
+
+  <script>
+    // Função principal para gerenciar qual etapa mostrar
+    function nextStep(step) {
+      document.getElementById('step1').style.display = 'none';
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('step3').style.display = 'none';
+
+      if (step === 1) {
+        document.getElementById('step1').style.display = 'block';
+        // Reinicia o script da etapa 1 (oculta o botão novamente)
+        document.getElementById('processar-btn').style.display = 'none';
+        setTimeout(() => {
+            document.getElementById('processar-btn').style.display = 'inline-block';
+        }, 4000); 
+      } else if (step === 2) {
+        document.getElementById('step2').style.display = 'block';
+        // Inicia o script da etapa 2
+        runStep2Logs();
+      } else if (step === 3) {
+        document.getElementById('step3').style.display = 'block';
+      }
+    }
+
+    // Lógica original da Etapa 2, adaptada para ser chamada como função
+    function runStep2Logs() {
+      const logs = [
+        "🔍 Analisando padrões faciais...",
+        "📡 Conectando ao banco de dados...",
+        "📶 Transmissão via ESP32 Wi-Fi iniciada...",
+        "🔐 Validando credenciais...",
+      ];
+      const logContainer = document.getElementById("log-output");
+      const acessoBtn = document.getElementById("acesso-btn");
+      let index = 0;
+
+      // Limpa logs anteriores se houver
+      logContainer.innerHTML = ''; 
+      acessoBtn.style.display = 'none';
+
+      function showLog() {
+        if (index < logs.length) {
+          const line = document.createElement("p");
+          line.textContent = logs[index];
+          logContainer.appendChild(line);
+          index++;
+          setTimeout(showLog, 1000);
+        } else {
+          acessoBtn.style.display = "inline-block";
+        }
+      }
+
+      showLog();
+    }
+    
+    // Inicia a primeira etapa quando a página carregar
+    nextStep(1); 
+
+  </script>
+</body>
+</html>
